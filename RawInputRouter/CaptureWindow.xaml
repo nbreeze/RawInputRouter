@@ -1,0 +1,49 @@
+﻿<Window x:Class="RawInputRouter.CaptureWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:RawInputRouter"
+        mc:Ignorable="d"
+        Title="Device Capture" Height="342.637" Width="563.394" Background="{StaticResource STYLE_SecondaryBGColor}" ResizeMode="NoResize"
+        x:Name="window">
+    <StackPanel VerticalAlignment="Center" Margin="15,10,15,15">
+        <Button x:Name="StatusButton" HorizontalAlignment="Center" Width="128" Click="StatusButton_Click">
+            <Button.Style>
+                <Style TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ElementName=window, Path=IsCapturing}" Value="False">
+                            <DataTrigger.Setters>
+                                <Setter Property="Content" Value="Capture"/>
+                            </DataTrigger.Setters>
+                        </DataTrigger>
+
+                        <DataTrigger Binding="{Binding ElementName=window, Path=IsCapturing}" Value="True">
+                            <DataTrigger.Setters>
+                                <Setter Property="Content" Value="Stop Capturing"/>
+                            </DataTrigger.Setters>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Button.Style>
+        </Button>
+
+        <StackPanel>
+            <TextBlock>Name:</TextBlock>
+            <TextBox Text="{Binding ElementName=window, Path=TemporaryDevice.Name, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+            <TextBlock>Device Path:</TextBlock>
+            <TextBox IsReadOnly="True" IsEnabled="False" Text="{Binding ElementName=window, Path=TemporaryDevice.DevicePath, UpdateSourceTrigger=PropertyChanged}"/>
+            <TextBlock>Handle:</TextBlock>
+            <TextBox IsReadOnly="True" IsEnabled="False" Text="{Binding ElementName=window, Path=TemporaryDevice.DeviceHandle, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource IntPtrToHexStringConverter}}"/>
+
+        </StackPanel>
+
+        <TextBlock x:Name="StatusText" Margin="10" Text="{Binding ElementName=window, Path=ErrorText}" HorizontalAlignment="Center" Foreground="{StaticResource STYLE_WarningColor}"></TextBlock>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Button x:Name="OKButton" Click="OKButton_Click" Margin="0,0,8,0" Width="72" IsEnabled="{Binding ElementName=window, Path=IsDeviceVerified}">OK</Button>
+            <Button Click="CancelButton_Click" IsCancel="True" Margin="0" Width="72">Cancel</Button>
+        </StackPanel>
+
+    </StackPanel>
+</Window>

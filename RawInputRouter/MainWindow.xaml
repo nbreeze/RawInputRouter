@@ -1,0 +1,239 @@
+﻿<Window x:Name="window" x:Class="RawInputRouter.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:RawInputRouter"
+        xmlns:ctrl="clr-namespace:Itenso.Windows.Controls.ListViewLayout;assembly=Itenso.Windows.Controls.ListViewLayout"
+        mc:Ignorable="d"
+        Title="Raw Input Router" Height="450" Width="800">
+    <Grid Background="{StaticResource STYLE_PrimaryBGColor}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200">
+            </ColumnDefinition>
+            <ColumnDefinition>
+            </ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <ListBox Grid.Column="0" x:Name="ButtonList" Background="{StaticResource STYLE_PrimaryBGColor}" Padding="0" BorderThickness="0">
+            <ListBox.ItemContainerStyle>
+                <Style TargetType="{x:Type ListBoxItem}">
+                    <Setter Property="Padding" Value="15,10,15,10"></Setter>
+                    <Setter Property="FontSize" Value="15"></Setter>
+                    <Setter Property="Foreground" Value="{StaticResource STYLE_PrimaryFGColor}"></Setter>
+                    <Setter Property="BorderThickness" Value="0"/>
+                </Style>
+            </ListBox.ItemContainerStyle>
+            <ListBoxItem>
+                Devices
+            </ListBoxItem>
+            <ListBoxItem>
+                Processes
+            </ListBoxItem>
+            <ListBoxItem>
+                Routing
+            </ListBoxItem>
+        </ListBox>
+        <ScrollViewer Grid.Column="1" Padding="15,15,15,15" Background="{StaticResource STYLE_SecondaryBGColor}" VerticalScrollBarVisibility="Auto">
+            <TabControl SelectedIndex="{Binding SelectedIndex, ElementName=ButtonList}" Background="Transparent" Padding="0" BorderThickness="0" SelectionChanged="TabControl_SelectionChanged">
+                <TabControl.ItemContainerStyle>
+                    <Style TargetType="{x:Type TabItem}">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Setter Property="Padding" Value="0"/>
+                    </Style>
+                </TabControl.ItemContainerStyle>
+
+                <TabControl.Resources>
+                    <Style x:Key="OptionHeader" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
+                        <Setter Property="Margin" Value="0,0,0,8"/>
+                    </Style>
+                </TabControl.Resources>
+
+                <TabItem>
+                    <StackPanel>
+                        <ListView Height="224"
+                              ctrl:ListViewLayoutManager.Enabled="True"
+                              ItemsSource="{Binding InputManager.Devices, ElementName=window}">
+                            <ListView.Resources>
+                                <ContextMenu x:Key="DeviceContextMenu">
+                                    <MenuItem Header="Edit" Click="EditDeviceMenuItem_Click"/>
+                                    <MenuItem Header="Delete" Click="DeleteDeviceMenuItem_Click"/>
+                                </ContextMenu>
+                            </ListView.Resources>
+                            
+                            <ListView.View>
+                                <GridView AllowsColumnReorder="False">
+                                    <GridViewColumn Header="X" ctrl:FixedColumn.Width="32">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <CheckBox IsChecked="{Binding BlockInput, Mode=TwoWay}"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                    <GridViewColumn ctrl:RangeColumn.IsFillColumn="True">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Vertical">
+                                                    <TextBlock Text="{Binding Name}" FontSize="16"/>
+                                                    <TextBlock Text="{Binding DevicePath}" FontSize="10"/>
+                                                    <TextBlock Text="{Binding DeviceHandle, Converter={StaticResource IntPtrToHexStringConverter}}" FontSize="10"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                </GridView>
+                            </ListView.View>
+
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="{x:Type ListViewItem}" BasedOn="{StaticResource {x:Type ListViewItem}}">
+                                    <Setter Property="ContextMenu" Value="{StaticResource DeviceContextMenu}"/>
+                                </Style>
+                            </ListView.ItemContainerStyle>
+                            
+                        </ListView>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,8,0,8">
+                            <Button Click="ButtonCaptureNewDevice_Click" 
+                                    IsEnabled="{Binding IsInCaptureMode, ElementName=window, Converter={StaticResource InverseBooleanConverter}}">Capture New Device</Button>
+                        </StackPanel>
+                    </StackPanel>
+                </TabItem>
+
+                <TabItem>
+                    <StackPanel>
+                        <ListView Height="224"
+                                  ItemsSource="{Binding InputManager.ProcessWindows, ElementName=window}"
+                                  >
+
+                            <ListView.Resources>
+                                <ContextMenu x:Key="ProcessWindowContextMenu">
+                                    <MenuItem Header="Edit" Click="EditProcessWindowMenuItem_Click"/>
+                                    <MenuItem Header="Delete" Click="DeleteProcessWindowMenuItem_Click"/>
+                                </ContextMenu>
+                            </ListView.Resources>
+
+                            <ListView.View>
+                                <GridView AllowsColumnReorder="False">
+                                    <GridView.ColumnHeaderContainerStyle>
+                                        <Style TargetType="{x:Type GridViewColumnHeader}">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </Style>
+                                    </GridView.ColumnHeaderContainerStyle>
+                                    <GridViewColumn>
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Vertical">
+                                                    <TextBlock Text="{Binding Name}" FontSize="16"/>
+                                                    <TextBlock Text="{Binding ExeName}" FontSize="10"/>
+                                                    <TextBlock Text="{Binding WindowTitle}" FontSize="10"/>
+                                                    <TextBlock Text="{Binding WindowHandle, Converter={StaticResource IntPtrToHexStringConverter}}" FontSize="10"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                </GridView>
+                            </ListView.View>
+
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="{x:Type ListViewItem}" BasedOn="{StaticResource {x:Type ListViewItem}}">
+                                    <Setter Property="ContextMenu" Value="{StaticResource ProcessWindowContextMenu}"/>
+                                </Style>
+                            </ListView.ItemContainerStyle>
+
+                        </ListView>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,8,0,8">
+                            <Button Click="ButtonNewWindow_Click">New Window</Button>
+                        </StackPanel>
+                    </StackPanel>
+                </TabItem>
+
+                <TabItem>
+                    <StackPanel>
+                        <ListView Height="224"
+                                  ItemsSource="{Binding InputManager.InputRoutes, ElementName=window}"
+                                  ctrl:ListViewLayoutManager.Enabled="True">
+                            <ListView.Resources>
+                                <local:InputRouteDataTemplateSelector x:Key="InputDataTemplateSelector">
+                                    <local:InputRouteDataTemplateSelector.KeyboardTemplate>
+                                        <DataTemplate>
+                                            <TextBox IsEnabled="False"></TextBox>
+                                        </DataTemplate>
+                                    </local:InputRouteDataTemplateSelector.KeyboardTemplate>
+                                </local:InputRouteDataTemplateSelector>
+
+                                <ContextMenu x:Key="InputRouteContextMenu">
+                                    <MenuItem Header="Delete" Click="DeleteInputRouteMenuItem_Click"/>
+                                </ContextMenu>
+                            </ListView.Resources>
+                            
+                            <ListView.View>
+                                <GridView AllowsColumnReorder="False">
+                                    <GridViewColumn Width="32" ctrl:FixedColumn.Width="32">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                    <GridViewColumn Width="32" ctrl:FixedColumn.Width="32" Header="C">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <CheckBox IsChecked="{Binding CaptureAllInput, Mode=TwoWay}"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                    <GridViewColumn Width="32" ctrl:FixedColumn.Width="32" Header="I">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <CheckBox IsChecked="{Binding IgnoreIfFocused, Mode=TwoWay}"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                    <GridViewColumn Header="Input Device" ctrl:ProportionalColumn.Width="1">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <ComboBox DropDownOpened="IRDeviceComboBox_DropDownOpened" SelectedValue="{Binding InputDevice, Mode=TwoWay}" DisplayMemberPath="Name"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                    <GridViewColumn Header="Target Window" ctrl:ProportionalColumn.Width="1">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <ComboBox DropDownOpened="IRProcessWindowComboBox_DropDownOpened" SelectedValue="{Binding TargetWindow, Mode=TwoWay}" DisplayMemberPath="Name"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                    <GridViewColumn Header="Input" CellTemplateSelector="{StaticResource InputDataTemplateSelector}" ctrl:ProportionalColumn.Width="0.5"/>
+                                    <GridViewColumn Header="Output" ctrl:ProportionalColumn.Width="0.5">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                    
+                                </GridView>
+                            </ListView.View>
+
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="{x:Type ListViewItem}" BasedOn="{StaticResource {x:Type ListViewItem}}">
+                                    <Setter Property="ContextMenu" Value="{StaticResource InputRouteContextMenu}"/>
+                                </Style>
+                            </ListView.ItemContainerStyle>
+                        </ListView>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,8,0,8">
+                            <Button Click="ButtonNewInputRoute_Click" Content="New Input Route">
+                                <Button.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="Keyboard" Click="NewKeyboardIRMenuItem_Click"/>
+                                    </ContextMenu>
+                                </Button.ContextMenu>
+                            </Button>
+                        </StackPanel>
+
+                    </StackPanel>
+                </TabItem>
+            </TabControl>
+        </ScrollViewer>
+    </Grid>
+</Window>
