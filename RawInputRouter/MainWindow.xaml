@@ -9,10 +9,8 @@
         Title="Raw Input Router" Height="450" Width="800">
     <Grid Background="{StaticResource STYLE_PrimaryBGColor}">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200">
-            </ColumnDefinition>
-            <ColumnDefinition>
-            </ColumnDefinition>
+            <ColumnDefinition Width="200" />
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <ListBox Grid.Column="0" x:Name="ButtonList" Background="{StaticResource STYLE_PrimaryBGColor}" Padding="0" BorderThickness="0">
             <ListBox.ItemContainerStyle>
@@ -48,8 +46,12 @@
                     </Style>
                 </TabControl.Resources>
 
-                <TabItem>
+                <TabItem Header="Devices">
                     <StackPanel>
+                        <TextBlock Style="{StaticResource Header}">
+                            Devices
+                        </TextBlock>
+                        
                         <ListView Height="224"
                               ctrl:ListViewLayoutManager.Enabled="True"
                               ItemsSource="{Binding InputManager.Devices, ElementName=window}">
@@ -62,7 +64,25 @@
                             
                             <ListView.View>
                                 <GridView AllowsColumnReorder="False">
-                                    <GridViewColumn Header="X" ctrl:FixedColumn.Width="32">
+                                    <GridViewColumn ctrl:FixedColumn.Width="32">
+                                        <GridViewColumn.Header>
+                                            <GridViewColumnHeader Content="X">
+                                                <GridViewColumnHeader.ToolTip>
+                                                    <ToolTip
+                                                         Foreground="{StaticResource STYLE_PrimaryFGColor}"
+                                                         Background="{StaticResource STYLE_PrimaryBGColor}">
+                                                        <StackPanel MaxWidth="250">
+                                                            <TextBlock FontFamily="Bold">
+                                                                Block Input?
+                                                            </TextBlock>
+                                                            <TextBlock TextWrapping="Wrap">
+                                                                Blocks incoming input messages from the device from reaching other applications. This application will continue to recieve input from the device for routing.
+                                                            </TextBlock>
+                                                        </StackPanel>
+                                                    </ToolTip>
+                                                </GridViewColumnHeader.ToolTip>
+                                            </GridViewColumnHeader>
+                                        </GridViewColumn.Header>
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
                                                 <CheckBox IsChecked="{Binding BlockInput, Mode=TwoWay}"/>
@@ -98,8 +118,12 @@
                     </StackPanel>
                 </TabItem>
 
-                <TabItem>
+                <TabItem Header="Processes">
                     <StackPanel>
+                        <TextBlock Style="{StaticResource Header}">
+                            Processes
+                        </TextBlock>
+
                         <ListView Height="224"
                                   ItemsSource="{Binding InputManager.ProcessWindows, ElementName=window}"
                                   >
@@ -147,8 +171,12 @@
                     </StackPanel>
                 </TabItem>
 
-                <TabItem>
+                <TabItem Header="Routing">
                     <StackPanel>
+                        <TextBlock Style="{StaticResource Header}">
+                            Routing
+                        </TextBlock>
+                        
                         <ListView Height="224"
                                   ItemsSource="{Binding InputManager.InputRoutes, ElementName=window}"
                                   ctrl:ListViewLayoutManager.Enabled="True">
@@ -174,17 +202,54 @@
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
-                                    <GridViewColumn Width="32" ctrl:FixedColumn.Width="32" Header="C">
+                                    <GridViewColumn Width="32" ctrl:FixedColumn.Width="32">
+                                        <GridViewColumn.Header>
+                                            <GridViewColumnHeader Content="C">
+                                                <GridViewColumnHeader.ToolTip>
+                                                    <ToolTip
+                                                         Foreground="{StaticResource STYLE_PrimaryFGColor}"
+                                                         Background="{StaticResource STYLE_PrimaryBGColor}">
+                                                        <StackPanel MaxWidth="250">
+                                                            <TextBlock FontFamily="Bold">
+                                                                Capture All Input
+                                                            </TextBlock>
+                                                            <TextBlock TextWrapping="Wrap">
+                                                                Captures and forwards all inputs instead of whatever is defined as Input.
+                                                            </TextBlock>
+                                                        </StackPanel>
+                                                    </ToolTip>
+                                                </GridViewColumnHeader.ToolTip>
+                                            </GridViewColumnHeader>
+                                        </GridViewColumn.Header>
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
                                                 <CheckBox IsChecked="{Binding CaptureAllInput, Mode=TwoWay}"/>
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
-                                    <GridViewColumn Width="32" ctrl:FixedColumn.Width="32" Header="I">
+                                    <GridViewColumn Width="32" ctrl:FixedColumn.Width="32">
+                                        <GridViewColumn.Header>
+                                            <GridViewColumnHeader Content="I">
+                                                <GridViewColumnHeader.ToolTip>
+                                                    <ToolTip
+                                                         Foreground="{StaticResource STYLE_PrimaryFGColor}"
+                                                         Background="{StaticResource STYLE_PrimaryBGColor}">
+                                                        <StackPanel MaxWidth="250">
+                                                            <TextBlock FontFamily="Bold">
+                                                                Ignore if Window Has Focus
+                                                            </TextBlock>
+                                                            <TextBlock TextWrapping="Wrap">
+                                                                Do not forward input to the window if it already has focus.
+                                                            </TextBlock>
+                                                        </StackPanel>
+                                                    </ToolTip>
+                                                </GridViewColumnHeader.ToolTip>
+                                            </GridViewColumnHeader>
+                                        </GridViewColumn.Header>
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
-                                                <CheckBox IsChecked="{Binding IgnoreIfFocused, Mode=TwoWay}"/>
+                                                <CheckBox IsChecked="{Binding IgnoreIfFocused, Mode=TwoWay}"
+                                                          ToolTip="{StaticResource IgnoreIfFocusedTooltip}"/>
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
