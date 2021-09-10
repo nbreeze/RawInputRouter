@@ -162,19 +162,19 @@ namespace RawInputRouter.Routing
 
             CleanInputBuffer();
 
-            IDeviceSource matchedSource = null;
             DeviceInput matchedInput = MatchBufferDeviceInput(input);
 
             // Handle edge case where holding doing key repeatedly might "leak"
             if (matchedInput == null && input.IsKeyDown)
             {
                 // Try to see if any device is currently holding the key.
-                matchedSource = Devices.Where(d => d.State.GetVirtualKeyState(input))
+                IDeviceSource matchedSource = Devices.Where(d => d.State.GetVirtualKeyState(input))
                     .FirstOrDefault();
 
                 if (matchedSource != null)
                 {
                     // dumb but works
+                    input.DeviceHandle = matchedSource.Handle;
                     matchedInput = input;
                 }
             }
@@ -182,7 +182,7 @@ namespace RawInputRouter.Routing
             if (matchedInput != null)
             {
                 // Find device that made the input.
-                matchedSource ??= Devices.Where(d => d.Handle == matchedInput.DeviceHandle)
+                IDeviceSource matchedSource = Devices.Where(d => d.Handle == matchedInput.DeviceHandle)
                     .FirstOrDefault();
 
                 if (matchedSource != null)
