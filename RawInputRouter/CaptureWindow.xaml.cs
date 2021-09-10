@@ -1,4 +1,5 @@
 ﻿using RawInputRouter.Imports;
+using RawInputRouter.Routing;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -25,7 +26,7 @@ namespace RawInputRouter
     {
         public static readonly DependencyProperty DeviceProperty = DependencyProperty.Register(
             "Device",
-            typeof(InputManager.Device),
+            typeof(RIRDeviceSource),
             typeof(CaptureWindow),
             new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender)
         );
@@ -53,20 +54,20 @@ namespace RawInputRouter
 
         public static readonly DependencyProperty TemporaryDeviceProperty = DependencyProperty.Register(
             "TemporaryDevice",
-            typeof(InputManager.Device),
+            typeof(RIRDeviceSource),
             typeof(CaptureWindow),
             new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender)
         );
 
-        public delegate bool VerifyResultDelegate(InputManager.Device tempDevice, InputManager.Device device, ref string errorText);
+        public delegate bool VerifyResultDelegate(RIRDeviceSource tempDevice, RIRDeviceSource device, ref string errorText);
         public event VerifyResultDelegate VerifyResult;
 
-        public delegate void AcceptResultDelegate(InputManager.Device tempDevice, InputManager.Device device);
+        public delegate void AcceptResultDelegate(RIRDeviceSource tempDevice, RIRDeviceSource device);
         public event AcceptResultDelegate AcceptResult;
 
-        public InputManager.Device Device { get => (InputManager.Device)GetValue(DeviceProperty); set => SetValue(DeviceProperty, value); }
+        public RIRDeviceSource Device { get => (RIRDeviceSource)GetValue(DeviceProperty); set => SetValue(DeviceProperty, value); }
 
-        public InputManager.Device TemporaryDevice { get => (InputManager.Device)GetValue(TemporaryDeviceProperty); set => SetValue(TemporaryDeviceProperty, value); }
+        public RIRDeviceSource TemporaryDevice { get => (RIRDeviceSource)GetValue(TemporaryDeviceProperty); set => SetValue(TemporaryDeviceProperty, value); }
 
         public bool IsDeviceVerified { get => (bool)GetValue(IsDeviceVerifiedProperty); set => SetValue(IsDeviceVerifiedProperty, value); }
 
@@ -79,7 +80,7 @@ namespace RawInputRouter
         {
             InitializeComponent();
 
-            TemporaryDevice = new InputManager.Device();
+            TemporaryDevice = new RIRDeviceSource();
 
             Deactivated += CaptureWindow_Deactivated;
         }
@@ -110,7 +111,7 @@ namespace RawInputRouter
             IsCapturing = false;
         }
 
-        public void OnRawInputMessage(IntPtr wParam, IntPtr lParam)
+        public void ProcessRawInputMessage(IntPtr wParam, IntPtr lParam)
         {
             var header = new User32.RAWINPUTHEADER();
             var mouse = new User32.RAWMOUSE();
@@ -124,8 +125,8 @@ namespace RawInputRouter
             {
                 StopCapturing();
 
-                TemporaryDevice.DeviceHandle = hDevice;
-                TemporaryDevice.DevicePath = User32.GetRawInputDeviceName(hDevice);
+                TemporaryDevice.Handle = hDevice;
+                TemporaryDevice.Path = User32.GetRawInputDeviceName(hDevice);
 
                 var errorText = "";
                 if (VerifyResult == null || VerifyResult(TemporaryDevice, Device, ref errorText))

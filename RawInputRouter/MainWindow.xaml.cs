@@ -1,4 +1,5 @@
 ﻿using RawInputRouter.Imports;
+using RawInputRouter.Routing;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -29,7 +30,7 @@ namespace RawInputRouter
     {
         public static MainWindow Instance { get; private set; } = null;
 
-        public InputManager InputManager { get; } = new InputManager();
+        public IRoutingManager InputManager { get; } = new RIRRoutingManager();
 
         public static readonly DependencyProperty IsInCaptureModeProperty = DependencyProperty.Register(
             "IsInCaptureMode",
@@ -66,7 +67,7 @@ namespace RawInputRouter
                 return;
             }
 
-            if (!RirListener.Install(hWnd))
+            if (!WinMsgIntercept.Install(hWnd))
             {
                 User32.MessageBox(hWnd, "FATAL ERROR! RirInstall failed.", null, 0);
                 process.Kill();
@@ -87,20 +88,42 @@ namespace RawInputRouter
             switch (msg)
             {
                 case 0xfe: // WM_INPUT_DEVICE_CHANGE
-                    return Instance.InputManager.OnRawInputDeviceChangedMessage(wParam, lParam, ref handled);
+                    Instance.InputManager.ProcessRawInputDeviceChangedMessage(wParam, lParam);
+                    break;
 
                 case 0xff: // WM_INPUT
                     if (Instance.IsInCaptureMode)
-                        Instance.CaptureWindow?.OnRawInputMessage(wParam, lParam);
+                    {
+                        Instance.CaptureWindow?.ProcessRawInputMessage(wParam, lParam);
+                        handled = true;
+                        return new IntPtr(1);
+                    }
 
-                    return Instance.InputManager.OnRawInputMessage(wParam, lParam, ref handled);
-
-                case 0xdabb: // Window activity hook
-                    Instance.InputManager.OnCBTMessage(wParam, lParam);
+                    if (Instance.InputManager.ProcessRawInputMessage(wParam, lParam))
+                    {
+                        handled = true;
+                        return new IntPtr(1);
+                    }
                     break;
 
-                case 0xface: // Keyboard Intercept hook
-                    return Instance.InputManager.OnInputInterceptMessage(1, wParam, lParam, ref handled);
+                case WinMsgIntercept.WM_HOOK_KEYBOARD_INTERCEPT: // Keyboard Intercept hook
+                    if (Instance.InputManager.ProcessKeyboardInterceptMessage(wParam, lParam))
+                    {
+                        handled = true;
+                        return new IntPtr(1);
+                    }
+                        
+                    break;
+
+                case WinMsgIntercept.WM_HOOK_CBT: // Window activity hook
+                    Instance.InputManager.ProcessWindowMessage(wParam, lParam);
+                    break;
+
+#if DEBUG
+                case WinMsgIntercept.WM_DEBUG_OUTPUT: // Generic debug output
+                    Debug.WriteLine("Debug output message: " + wParam + ", " + lParam );
+                    break;
+#endif
             }
 
             return IntPtr.Zero;
@@ -115,9 +138,9 @@ namespace RawInputRouter
 
         }
 
-        private bool VerifyDeviceCapture(InputManager.Device tempDevice, InputManager.Device device, ref string s)
+        private bool VerifyDeviceCapture(RIRDeviceSource tempDevice, RIRDeviceSource device, ref string s)
         {
-            if (InputManager.Devices.FirstOrDefault(d2 => d2 != device && d2.DevicePath.Equals(tempDevice.DevicePath, StringComparison.InvariantCultureIgnoreCase)) != null)
+            if (InputManager.Devices.FirstOrDefault(d2 => d2 != device && d2.Path.Equals(tempDevice.Path, StringComparison.InvariantCultureIgnoreCase)) != null)
             {
                 s = "A registered device with the same path already exists.";
                 return false;
@@ -143,7 +166,7 @@ namespace RawInputRouter
 
         private void EditDeviceMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            var device = (InputManager.Device)((ListViewItem)((ContextMenu)((MenuItem)sender).Parent).PlacementTarget).Content;
+            var device = (RIRDeviceSource)((ListViewItem)((ContextMenu)((MenuItem)sender).Parent).PlacementTarget).Content;
             if (device == null)
                 return;
 
@@ -151,8 +174,8 @@ namespace RawInputRouter
 
             CaptureWindow.Device = device;
             CaptureWindow.TemporaryDevice.Name = device.Name;
-            CaptureWindow.TemporaryDevice.DevicePath = device.DevicePath;
-            CaptureWindow.TemporaryDevice.DeviceHandle = device.DeviceHandle;
+            CaptureWindow.TemporaryDevice.Path = device.Path;
+            CaptureWindow.TemporaryDevice.Handle = device.Handle;
 
             CaptureWindow.SetBinding(CaptureWindow.IsCapturingProperty, new Binding("IsInCaptureMode")
             {
@@ -163,8 +186,8 @@ namespace RawInputRouter
             CaptureWindow.AcceptResult += (td, d) =>
             {
                 d.Name = td.Name;
-                d.DevicePath = td.DevicePath;
-                d.DeviceHandle = td.DeviceHandle;
+                d.Path = td.Path;
+                d.Handle = td.Handle;
             };
             CaptureWindow.IsDeviceVerified = true;
             CaptureWindow.Show();
@@ -172,14 +195,14 @@ namespace RawInputRouter
 
         private void DeleteDeviceMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            var device = (InputManager.Device)((ListViewItem)((ContextMenu)((MenuItem)sender).Parent).PlacementTarget).Content;
+            var device = (RIRDeviceSource)((ListViewItem)((ContextMenu)((MenuItem)sender).Parent).PlacementTarget).Content;
             if (device == null)
                 return;
 
             InputManager.Devices.Remove(device);
         }
 
-        private bool VerifyProcessWindow(InputManager.ProcessWindow tempWindow, InputManager.ProcessWindow window, ref string s)
+        private bool VerifyProcessWindow(RIRApplicationReceiver tempWindow, RIRApplicationReceiver window, ref string s)
         {
             return true;
         }
@@ -188,12 +211,11 @@ namespace RawInputRouter
         {
             var window = new ProcessWindowDialog();
 
-            window.Title = "Add New Process Window";
+            window.Title = "Add New Application";
             window.VerifyResult += VerifyProcessWindow;
             window.AcceptResult += (tw, w) =>
             {
-                tw.Update(true);
-                InputManager.ProcessWindows.Add(tw);
+                InputManager.Applications.Add(tw);
             };
 
             window.Show();
@@ -201,27 +223,27 @@ namespace RawInputRouter
 
         private void EditProcessWindowMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            var processWindow = (InputManager.ProcessWindow)((ListViewItem)((ContextMenu)((MenuItem)sender).Parent).PlacementTarget).Content;
+            var processWindow = (RIRApplicationReceiver)((ListViewItem)((ContextMenu)((MenuItem)sender).Parent).PlacementTarget).Content;
             if (processWindow == null)
                 return;
 
             var window = new ProcessWindowDialog();
             window.ProcessWindow = processWindow;
             window.TemporaryProcessWindow.Name = processWindow.Name;
-            window.TemporaryProcessWindow.ExeName = processWindow.ExeName;
+            window.TemporaryProcessWindow.ExecutableName = processWindow.ExecutableName;
             window.TemporaryProcessWindow.WindowTitleSearch = processWindow.WindowTitleSearch;
             window.TemporaryProcessWindow.WindowTitleSearchMethod = processWindow.WindowTitleSearchMethod;
-            window.TemporaryProcessWindow.Update();
+            window.TemporaryProcessWindow.FindWindow();
 
-            window.Title = "Edit Process Window";
+            window.Title = "Edit Application";
             window.VerifyResult += VerifyProcessWindow;
             window.AcceptResult += (tw, w) =>
             {
                 w.Name = tw.Name;
-                w.ExeName = tw.ExeName;
+                w.ExecutableName = tw.ExecutableName;
                 w.WindowTitleSearch = tw.WindowTitleSearch;
                 w.WindowTitleSearchMethod = tw.WindowTitleSearchMethod;
-                w.Update(true);
+                w.FindWindow();
             };
 
             window.Show();
@@ -229,23 +251,23 @@ namespace RawInputRouter
 
         private void DeleteProcessWindowMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            var processWindow = (InputManager.ProcessWindow)((ListViewItem)((ContextMenu)((MenuItem)sender).Parent).PlacementTarget).Content;
+            var processWindow = (RIRApplicationReceiver)((ListViewItem)((ContextMenu)((MenuItem)sender).Parent).PlacementTarget).Content;
             if (processWindow == null)
                 return;
 
-            InputManager.ProcessWindows.Remove(processWindow);
+            InputManager.Applications.Remove(processWindow);
         }
 
         private void IRDeviceComboBox_DropDownOpened(object sender, EventArgs e)
         {
-            var items = new List<InputManager.Device>(InputManager.Devices);
+            var items = new List<IDeviceSource>(InputManager.Devices);
             items.Insert(0, null);
             ((ComboBox)sender).ItemsSource = items;
         }
 
         private void IRProcessWindowComboBox_DropDownOpened(object sender, EventArgs e)
         {
-            var items = new List<InputManager.ProcessWindow>(InputManager.ProcessWindows);
+            var items = new List<IApplicationReceiver>(InputManager.Applications);
             items.Insert(0, null);
             ((ComboBox)sender).ItemsSource = items;
         }
@@ -257,16 +279,50 @@ namespace RawInputRouter
 
         private void NewKeyboardIRMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            InputManager.InputRoutes.Add(new InputManager.KeyboardInputRoute());
+            InputManager.Routes.Add(new Route()
+            {
+                Source = InputManager.Devices.FirstOrDefault(),
+                Destination = InputManager.Applications.FirstOrDefault(),
+                InputFilter = new KeyboardRouteInputFilter()
+                {
+                    KeyState = KeyboardRouteInputKeyState.Down,
+                    Key = Key.PageDown
+                },
+                Actions =
+                {
+                    new AcceleratorOutputAction()
+                    {
+                        Accelerator = 393
+                    }
+                }
+            });
+
+            InputManager.Routes.Add(new Route()
+            {
+                Source = InputManager.Devices.FirstOrDefault(),
+                Destination = InputManager.Applications.FirstOrDefault(),
+                InputFilter = new KeyboardRouteInputFilter()
+                {
+                    KeyState = KeyboardRouteInputKeyState.Down,
+                    Key = Key.PageUp
+                },
+                Actions =
+                {
+                    new AcceleratorOutputAction()
+                    {
+                        Accelerator = 394
+                    }
+                }
+            });
         }
 
         private void DeleteInputRouteMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            var inputRoute = (InputManager.InputRoute)((ListViewItem)((ContextMenu)((MenuItem)sender).Parent).PlacementTarget).Content;
+            var inputRoute = (IRoute)((ListViewItem)((ContextMenu)((MenuItem)sender).Parent).PlacementTarget).Content;
             if (inputRoute == null)
                 return;
 
-            InputManager.InputRoutes.Remove(inputRoute);
+            InputManager.Routes.Remove(inputRoute);
         }
     }
 }

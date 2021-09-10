@@ -85,7 +85,7 @@
                                         </GridViewColumn.Header>
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
-                                                <CheckBox IsChecked="{Binding BlockInput, Mode=TwoWay}"/>
+                                                <CheckBox IsChecked="{Binding BlockOriginalInput, Mode=TwoWay}"/>
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
@@ -94,8 +94,8 @@
                                             <DataTemplate>
                                                 <StackPanel Orientation="Vertical">
                                                     <TextBlock Text="{Binding Name}" FontSize="16"/>
-                                                    <TextBlock Text="{Binding DevicePath}" FontSize="10"/>
-                                                    <TextBlock Text="{Binding DeviceHandle, Converter={StaticResource IntPtrToHexStringConverter}}" FontSize="10"/>
+                                                    <TextBlock Text="{Binding Path}" FontSize="10"/>
+                                                    <TextBlock Text="{Binding Handle, Converter={StaticResource IntPtrToHexStringConverter}}" FontSize="10"/>
                                                 </StackPanel>
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
@@ -125,7 +125,7 @@
                         </TextBlock>
 
                         <ListView Height="224"
-                                  ItemsSource="{Binding InputManager.ProcessWindows, ElementName=window}"
+                                  ItemsSource="{Binding InputManager.Applications, ElementName=window}"
                                   >
 
                             <ListView.Resources>
@@ -147,9 +147,9 @@
                                             <DataTemplate>
                                                 <StackPanel Orientation="Vertical">
                                                     <TextBlock Text="{Binding Name}" FontSize="16"/>
-                                                    <TextBlock Text="{Binding ExeName}" FontSize="10"/>
+                                                    <TextBlock Text="{Binding ExecutableName}" FontSize="10"/>
                                                     <TextBlock Text="{Binding WindowTitle}" FontSize="10"/>
-                                                    <TextBlock Text="{Binding WindowHandle, Converter={StaticResource IntPtrToHexStringConverter}}" FontSize="10"/>
+                                                    <TextBlock Text="{Binding Handle, Converter={StaticResource IntPtrToHexStringConverter}}" FontSize="10"/>
                                                 </StackPanel>
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
@@ -178,7 +178,7 @@
                         </TextBlock>
                         
                         <ListView Height="224"
-                                  ItemsSource="{Binding InputManager.InputRoutes, ElementName=window}"
+                                  ItemsSource="{Binding InputManager.Routes, ElementName=window}"
                                   ctrl:ListViewLayoutManager.Enabled="True">
                             <ListView.Resources>
                                 <local:InputRouteDataTemplateSelector x:Key="InputDataTemplateSelector">
@@ -248,22 +248,21 @@
                                         </GridViewColumn.Header>
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
-                                                <CheckBox IsChecked="{Binding IgnoreIfFocused, Mode=TwoWay}"
-                                                          ToolTip="{StaticResource IgnoreIfFocusedTooltip}"/>
+                                                <CheckBox IsChecked="{Binding IgnoreIfFocused, Mode=TwoWay}"/>
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
                                     <GridViewColumn Header="Input Device" ctrl:ProportionalColumn.Width="1">
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
-                                                <ComboBox DropDownOpened="IRDeviceComboBox_DropDownOpened" SelectedValue="{Binding InputDevice, Mode=TwoWay}" DisplayMemberPath="Name"/>
+                                                <ComboBox DropDownOpened="IRDeviceComboBox_DropDownOpened" SelectedValue="{Binding Source, Mode=TwoWay}" DisplayMemberPath="Name"/>
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
                                     <GridViewColumn Header="Target Window" ctrl:ProportionalColumn.Width="1">
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
-                                                <ComboBox DropDownOpened="IRProcessWindowComboBox_DropDownOpened" SelectedValue="{Binding TargetWindow, Mode=TwoWay}" DisplayMemberPath="Name"/>
+                                                <ComboBox DropDownOpened="IRProcessWindowComboBox_DropDownOpened" SelectedValue="{Binding Destination, Mode=TwoWay}" DisplayMemberPath="Name"/>
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>

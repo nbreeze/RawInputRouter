@@ -15,7 +15,7 @@
             <TextBlock>Name:</TextBlock>
             <TextBox Text="{Binding ElementName=window, Path=TemporaryProcessWindow.Name, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
             <TextBlock>Executable Name:</TextBlock>
-            <TextBox Text="{Binding ElementName=window, Path=TemporaryProcessWindow.ExeName, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+            <TextBox Text="{Binding ElementName=window, Path=TemporaryProcessWindow.ExecutableName, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
             <TextBlock>Window Title Search Query:</TextBlock>
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -31,7 +31,7 @@
             <TextBlock>Window Title:</TextBlock>
             <TextBox IsReadOnly="True" Text="{Binding ElementName=window,Path=TemporaryProcessWindow.WindowTitle, UpdateSourceTrigger=PropertyChanged}" IsEnabled="False"/>
             <TextBlock>Handle:</TextBlock>
-            <TextBox IsReadOnly="True" Text="{Binding ElementName=window, Path=TemporaryProcessWindow.WindowHandle, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource IntPtrToHexStringConverter}}" IsEnabled="False"/>
+            <TextBox IsReadOnly="True" Text="{Binding ElementName=window, Path=TemporaryProcessWindow.Handle, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource IntPtrToHexStringConverter}}" IsEnabled="False"/>
         </StackPanel>
 
         <TextBlock x:Name="StatusText" Margin="10" Text="{Binding ElementName=window, Path=ErrorText, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" Foreground="{StaticResource STYLE_WarningColor}"></TextBlock>

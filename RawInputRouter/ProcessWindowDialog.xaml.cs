@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RawInputRouter.Routing;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -23,41 +24,39 @@ namespace RawInputRouter
     {
         public static readonly DependencyProperty TemporaryProcessWindowProperty = DependencyProperty.Register(
             "TemporaryProcessWindow",
-            typeof(InputManager.ProcessWindow),
+            typeof(RIRApplicationReceiver),
             typeof(ProcessWindowDialog),
             new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender)
         );
 
         public static readonly DependencyProperty ProcessWindowProperty = DependencyProperty.Register(
             "ProcessWindow",
-            typeof(InputManager.ProcessWindow),
+            typeof(RIRApplicationReceiver),
             typeof(ProcessWindowDialog),
             new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender)
         );
 
-        public delegate bool VerifyResultDelegate(InputManager.ProcessWindow tempWindow, InputManager.ProcessWindow window, ref string errorText);
+        public delegate bool VerifyResultDelegate(RIRApplicationReceiver tempWindow, RIRApplicationReceiver window, ref string errorText);
         public event VerifyResultDelegate VerifyResult;
 
-        public delegate void AcceptResultDelegate(InputManager.ProcessWindow tempWindow, InputManager.ProcessWindow window);
+        public delegate void AcceptResultDelegate(RIRApplicationReceiver tempWindow, RIRApplicationReceiver window);
         public event AcceptResultDelegate AcceptResult;
 
-        public InputManager.ProcessWindow ProcessWindow { get => (InputManager.ProcessWindow)GetValue(ProcessWindowProperty); set => SetValue(ProcessWindowProperty, value); }
+        public RIRApplicationReceiver ProcessWindow { get => (RIRApplicationReceiver)GetValue(ProcessWindowProperty); set => SetValue(ProcessWindowProperty, value); }
 
-        public InputManager.ProcessWindow TemporaryProcessWindow { get => (InputManager.ProcessWindow)GetValue(TemporaryProcessWindowProperty); set => SetValue(TemporaryProcessWindowProperty, value); }
+        public RIRApplicationReceiver TemporaryProcessWindow { get => (RIRApplicationReceiver)GetValue(TemporaryProcessWindowProperty); set => SetValue(TemporaryProcessWindowProperty, value); }
 
         public ProcessWindowDialog() : base()
         {
             InitializeComponent();
 
             SearchMethodComboBox.ItemsSource = Enum.GetValues(typeof(ProcessWindowTitleSearch));
-            TemporaryProcessWindow = new InputManager.ProcessWindow()
+            TemporaryProcessWindow = new RIRApplicationReceiver()
             {
-                ExeName = "",
+                ExecutableName = "",
                 Name = "",
                 WindowTitleSearchMethod = ProcessWindowTitleSearch.Exact,
-                WindowTitleSearch = "",
-                WindowTitle = "",
-                WindowHandle = IntPtr.Zero
+                WindowTitleSearch = ""
             };
 
             TemporaryProcessWindow.PropertyChanged += OnTemporaryProcessWindowPropertyChanged;
@@ -65,9 +64,9 @@ namespace RawInputRouter
 
         private void OnTemporaryProcessWindowPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if ( e.PropertyName == "ExeName" || e.PropertyName == "WindowTitleSearch" || e.PropertyName == "WindowTitleSearchMethod" )
+            if ( e.PropertyName == "ExecutableName" || e.PropertyName == "WindowTitleSearch" || e.PropertyName == "WindowTitleSearchMethod" )
             {
-                TemporaryProcessWindow.Update(true);
+                TemporaryProcessWindow.FindWindow();
             }
         }
 
@@ -79,7 +78,7 @@ namespace RawInputRouter
                 return;
             }
 
-            if (string.IsNullOrEmpty(TemporaryProcessWindow.ExeName.Trim()))
+            if (string.IsNullOrEmpty(TemporaryProcessWindow.ExecutableName.Trim()))
             {
                 ErrorText = "Executable name cannot be blank.";
                 return;

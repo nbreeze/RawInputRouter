@@ -32,9 +32,9 @@
             <TextBlock>Name:</TextBlock>
             <TextBox Text="{Binding ElementName=window, Path=TemporaryDevice.Name, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
             <TextBlock>Device Path:</TextBlock>
-            <TextBox IsReadOnly="True" IsEnabled="False" Text="{Binding ElementName=window, Path=TemporaryDevice.DevicePath, UpdateSourceTrigger=PropertyChanged}"/>
+            <TextBox IsReadOnly="True" IsEnabled="False" Text="{Binding ElementName=window, Path=TemporaryDevice.Path, UpdateSourceTrigger=PropertyChanged}"/>
             <TextBlock>Handle:</TextBlock>
-            <TextBox IsReadOnly="True" IsEnabled="False" Text="{Binding ElementName=window, Path=TemporaryDevice.DeviceHandle, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource IntPtrToHexStringConverter}}"/>
+            <TextBox IsReadOnly="True" IsEnabled="False" Text="{Binding ElementName=window, Path=TemporaryDevice.Handle, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource IntPtrToHexStringConverter}}"/>
 
         </StackPanel>
 

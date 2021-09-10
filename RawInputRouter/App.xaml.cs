@@ -167,9 +167,5 @@ namespace RawInputRouter
     /// </summary>
     public partial class App : Application
     {
-        private void ListView_PreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-
-        }
     }
 }
