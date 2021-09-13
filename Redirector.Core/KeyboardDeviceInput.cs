@@ -1,20 +1,7 @@
-﻿using RawInputRouter.Imports;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
 
-namespace RawInputRouter.Routing
+namespace Redirector.Core
 {
-    public abstract class DeviceInput
-    {
-        public IntPtr DeviceHandle = IntPtr.Zero;
-        public int Time = 0;
-
-        public abstract bool Matches(DeviceInput otherInput);
-    }
-
     public class KeyboardDeviceInput : DeviceInput
     {
         public int VKey = 0;

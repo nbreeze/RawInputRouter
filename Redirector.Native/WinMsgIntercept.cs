@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using PInvoke;
 
-namespace RawInputRouter.Imports
+namespace Redirector.Native
 {
     public static class WinMsgIntercept
     {
-        public const int WM_HOOK_KEYBOARD_INTERCEPT = User32.WM_APP + 0;
-        public const int WM_HOOK_CBT = User32.WM_APP + 1;
-        public const int WM_DEBUG_OUTPUT = User32.WM_APP + 2;
+        public const int WM_HOOK_KEYBOARD_INTERCEPT = (int)User32.WindowMessage.WM_APP + 0;
+        public const int WM_HOOK_CBT = WM_HOOK_KEYBOARD_INTERCEPT + 1;
+        public const int WM_DEBUG_OUTPUT = WM_HOOK_KEYBOARD_INTERCEPT + 2;
 
         [StructLayout(LayoutKind.Sequential)]
         public struct KeyboardInput
@@ -15,7 +16,7 @@ namespace RawInputRouter.Imports
             public int m_nVirtualKey;
             public int m_nProcessId;
             public int m_bPeek;
-            public int m_OriginalWindowHandle;
+            public uint m_OriginalWindowHandle;
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -25,16 +26,32 @@ namespace RawInputRouter.Imports
             public int m_nProcessId;
         }
 
+#if WIN64
         [DllImport("WinMsgInterceptx64.dll", CallingConvention = CallingConvention.StdCall, EntryPoint = "RirInstall")]
+#else
+        [DllImport("WinMsgInterceptx32.dll", CallingConvention = CallingConvention.StdCall, EntryPoint = "RirInstall")]
+#endif
         public static extern bool Install(IntPtr hWnd);
 
+#if WIN64
         [DllImport("WinMsgInterceptx64.dll", CallingConvention = CallingConvention.StdCall, EntryPoint = "RirUninstall")]
+#else
+        [DllImport("WinMsgInterceptx32.dll", CallingConvention = CallingConvention.StdCall, EntryPoint = "RirUninstall")]
+#endif
         public static extern bool Uninstall();
 
+#if WIN64
         [DllImport("WinMsgInterceptx64.dll", CallingConvention = CallingConvention.StdCall, EntryPoint = "RirGetKeyboardInput")]
-        public static extern bool GetKeyboardInput(ref KeyboardInput pInput);
+#else
+        [DllImport("WinMsgInterceptx32.dll", CallingConvention = CallingConvention.StdCall, EntryPoint = "RirGetKeyboardInput")]
+#endif
+        public static extern bool GetKeyboardInput(out KeyboardInput pInput);
 
+#if WIN64
         [DllImport("WinMsgInterceptx64.dll", CallingConvention = CallingConvention.StdCall, EntryPoint = "RirGetCBT")]
-        public static extern bool GetCBT(ref CBT pCBT);
+#else
+        [DllImport("WinMsgInterceptx32.dll", CallingConvention = CallingConvention.StdCall, EntryPoint = "RirGetKeyboardInput")]
+#endif
+        public static extern bool GetCBT(out CBT pCBT);
     }
 }

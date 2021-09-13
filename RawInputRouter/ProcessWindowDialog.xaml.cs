@@ -1,19 +1,5 @@
-﻿using RawInputRouter.Routing;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace RawInputRouter
 {
@@ -50,12 +36,12 @@ namespace RawInputRouter
         {
             InitializeComponent();
 
-            SearchMethodComboBox.ItemsSource = Enum.GetValues(typeof(ProcessWindowTitleSearch));
+            SearchMethodComboBox.ItemsSource = Enum.GetValues(typeof(WindowTitleSearchMethod));
             TemporaryProcessWindow = new RIRApplicationReceiver()
             {
                 ExecutableName = "",
                 Name = "",
-                WindowTitleSearchMethod = ProcessWindowTitleSearch.Exact,
+                WindowTitleSearchMethod = WindowTitleSearchMethod.Exact,
                 WindowTitleSearch = ""
             };
 

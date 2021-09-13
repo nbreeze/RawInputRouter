@@ -1,21 +1,7 @@
-﻿using RawInputRouter.Imports;
-using RawInputRouter.Routing;
+﻿using Redirector.Native;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace RawInputRouter
 {
@@ -113,20 +99,16 @@ namespace RawInputRouter
 
         public void ProcessRawInputMessage(IntPtr wParam, IntPtr lParam)
         {
-            var header = new User32.RAWINPUTHEADER();
-            var mouse = new User32.RAWMOUSE();
-            var keyboard = new User32.RAWKEYBOARD();
-            var hid = new User32.RAWHID();
+            RawInput.RAWINPUT info = new();
+            RawInput.GetRawInputData(lParam, ref info);
 
-            User32.GetRawInputData(lParam, ref header, ref mouse, ref keyboard, ref hid);
-
-            var hDevice = header.hDevice;
+            var hDevice = info.header.hDevice;
             if (hDevice != IntPtr.Zero)
             {
                 StopCapturing();
 
                 TemporaryDevice.Handle = hDevice;
-                TemporaryDevice.Path = User32.GetRawInputDeviceName(hDevice);
+                TemporaryDevice.Path = RawInput.GetRawInputDeviceInterfaceName(hDevice);
 
                 var errorText = "";
                 if (VerifyResult == null || VerifyResult(TemporaryDevice, Device, ref errorText))

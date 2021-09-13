@@ -1,7 +1,6 @@
-﻿using RawInputRouter.Imports;
-using System;
+﻿using System;
 
-namespace RawInputRouter.Routing
+namespace Redirector.Core
 {
     public class AcceleratorOutputAction : OutputAction
     {
@@ -14,7 +13,7 @@ namespace RawInputRouter.Routing
             if (destination == null || destination.Handle == IntPtr.Zero)
                 return;
 
-            User32.PostMessage(destination.Handle, User32.WM_COMMAND, (IntPtr)((1 << 16) | Accelerator), IntPtr.Zero);
+            PInvoke.User32.PostMessage(destination.Handle, PInvoke.User32.WindowMessage.WM_COMMAND, (IntPtr)(1 << 16 | Accelerator), IntPtr.Zero);
         }
     }
 }

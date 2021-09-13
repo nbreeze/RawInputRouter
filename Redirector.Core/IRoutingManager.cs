@@ -2,7 +2,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 
-namespace RawInputRouter.Routing
+namespace Redirector.Core
 {
     public interface IRoutingManager : INotifyPropertyChanged
     {

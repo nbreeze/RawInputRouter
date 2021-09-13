@@ -1,5 +1,4 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using RawInputRouter.Imports;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -8,8 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using PInvoke;
 
-namespace RawInputRouter.Routing
+namespace Redirector.Core
 {
     public class ApplicationReceiver : ObservableObject, IApplicationReceiver
     {
@@ -52,12 +52,11 @@ namespace RawInputRouter.Routing
                 IEnumerable<int> processIds = processes.Select((a) => a.Id);
 
                 List<IntPtr> windows = new List<IntPtr>();
-                User32.EnumWindows(hWnd =>
+                User32.EnumWindows((hWnd, lParam) =>
                 {
                     if (User32.IsWindow(hWnd) && User32.IsWindowVisible(hWnd))
                     {
-                        int processId = 0;
-                        User32.GetWindowThreadProcessId(hWnd, ref processId);
+                        User32.GetWindowThreadProcessId(hWnd, out int processId);
                         if (processIds.Contains(processId) && IsMatchingWindow(hWnd))
                         {
                             windows.Add(hWnd);
@@ -65,13 +64,12 @@ namespace RawInputRouter.Routing
                     }
 
                     return true;
-                });
+                }, IntPtr.Zero);
 
                 Handle = windows.FirstOrDefault();
                 if (Handle != IntPtr.Zero)
                 {
-                    int processId = 0;
-                    User32.GetWindowThreadProcessId(Handle, ref processId);
+                    User32.GetWindowThreadProcessId(Handle, out int processId);
                     Process = Process.GetProcessById(processId);
                 }
                 else

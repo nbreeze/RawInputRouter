@@ -1,7 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.ObjectModel;
 
-namespace RawInputRouter.Routing
+namespace Redirector.Core
 {
     public class Route : ObservableObject, IRoute
     {
@@ -11,15 +11,26 @@ namespace RawInputRouter.Routing
 
         public virtual ObservableCollection<IOutputAction> Actions { get; } = new();
 
-        public virtual IRouteInputFilter InputFilter { get; set; }
+        public virtual ObservableCollection<IRouteTrigger> Triggers { get; } = new();
 
         private bool _BlockOriginalInput = false;
 
         public bool BlockOriginalInput { get => _BlockOriginalInput; set => SetProperty(ref _BlockOriginalInput, value); }
 
+        public virtual bool ShouldTrigger(IDeviceSource source, DeviceInput input)
+        {
+            foreach (IRouteTrigger trigger in Triggers)
+            {
+                if (trigger.ShouldTrigger(this, source, input))
+                    return true;
+            }
+
+            return false;
+        }
+
         public virtual void OnInput(IDeviceSource source, DeviceInput input)
         {
-            if (InputFilter != null && !InputFilter.PassesFilter(this, source, input))
+            if (!ShouldTrigger(source, input))
                 return;
 
             foreach (IOutputAction action in Actions)
@@ -30,7 +41,7 @@ namespace RawInputRouter.Routing
 
         public virtual bool ShouldBlockOriginalInput(IDeviceSource source, DeviceInput input)
         {
-            if (InputFilter != null && !InputFilter.PassesFilter(this, source, input))
+            if (!ShouldTrigger(source, input))
                 return false;
 
             return BlockOriginalInput;

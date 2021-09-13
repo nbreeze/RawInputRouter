@@ -1,9 +1,10 @@
-﻿using RawInputRouter.Imports;
-using System;
+﻿using System;
 using System.Windows;
 using System.Windows.Controls;
-using RawInputRouter.Routing;
 using System.Threading.Tasks;
+using Redirector.Core;
+using Redirector.Native;
+using PInvoke;
 
 namespace RawInputRouter
 {
@@ -17,8 +18,7 @@ namespace RawInputRouter
         {
             base.ProcessWindowMessage(wParam, lParam);
 
-            WinMsgIntercept.CBT cbt = new();
-            WinMsgIntercept.GetCBT(ref cbt);
+            WinMsgIntercept.GetCBT(out var cbt);
 
             switch (cbt.Code)
             {
@@ -64,9 +64,9 @@ namespace RawInputRouter
             base.OnInput(source, input);
         }
 
-        protected override DeviceInput MatchBufferDeviceInput(DeviceInput input)
+        protected override DeviceInput MatchDeviceInputInBuffer(DeviceInput input)
         {
-            return base.MatchBufferDeviceInput(input);
+            return base.MatchDeviceInputInBuffer(input);
         }
 
         public override bool ShouldBlockOriginalInput(IDeviceSource source, DeviceInput input)

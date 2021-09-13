@@ -1,6 +1,7 @@
-﻿using System.Windows.Input;
+﻿using Redirector.Core;
+using System.Windows.Input;
 
-namespace RawInputRouter.Routing
+namespace RawInputRouter
 {
     public enum KeyboardRouteInputKeyState
     {
@@ -9,7 +10,7 @@ namespace RawInputRouter.Routing
         Up
     }
 
-    public class KeyboardRouteInputFilter : RouteInputFilter
+    public class KeyboardRouteTrigger : RouteTrigger
     {
         private Key? _Key = null;
 
@@ -19,7 +20,7 @@ namespace RawInputRouter.Routing
 
         public KeyboardRouteInputKeyState KeyState { get => _KeyState; set => SetProperty(ref _KeyState, value); }
 
-        public override bool PassesFilter(IRoute route, IDeviceSource source, DeviceInput input)
+        public override bool ShouldTrigger(IRoute route, IDeviceSource source, DeviceInput input)
         {
             if (Key == null)
                 return true;
@@ -37,7 +38,7 @@ namespace RawInputRouter.Routing
             if (kbInput == null || KeyInterop.KeyFromVirtualKey(kbInput.VKey) != Key)
                 return false;
 
-            return base.PassesFilter(route, source, input);
+            return base.ShouldTrigger(route, source, input);
         }
     }
 }

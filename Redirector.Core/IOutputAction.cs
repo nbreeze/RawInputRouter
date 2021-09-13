@@ -3,7 +3,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RawInputRouter.Routing
+namespace Redirector.Core
 {
     public interface IOutputAction
     {

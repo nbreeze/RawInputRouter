@@ -1,11 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 
-namespace RawInputRouter.Routing
+namespace Redirector.Core
 {
-    public abstract class RouteInputFilter : ObservableObject, IRouteInputFilter
+    public abstract class RouteTrigger : ObservableObject, IRouteTrigger
     {
-        public virtual bool PassesFilter(IRoute route, IDeviceSource source, DeviceInput input)
+        public virtual bool ShouldTrigger(IRoute route, IDeviceSource source, DeviceInput input)
         {
             IDeviceSource routeSource = route.Source;
             return routeSource != null && routeSource.Handle != IntPtr.Zero && routeSource == source;

@@ -1,9 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using RawInputRouter.Imports;
 using System;
 using System.Collections.Generic;
+using PInvoke;
+using Redirector.Native;
 
-namespace RawInputRouter.Routing
+namespace Redirector.Core
 {
     public class DeviceSource : ObservableObject, IDeviceSource
     {
@@ -23,12 +24,12 @@ namespace RawInputRouter.Routing
 
         public virtual IntPtr FindHandle()
         {
-            List<User32.RAWINPUTDEVICELIST> devices = new();
-            User32.GetRawInputDeviceList(devices);
+            List<RawInput.RAWINPUTDEVICELIST> devices = new();
+            RawInput.GetRawInputDeviceList(devices);
 
-            foreach (User32.RAWINPUTDEVICELIST device in devices)
+            foreach (RawInput.RAWINPUTDEVICELIST device in devices)
             {
-                string deviceName = User32.GetRawInputDeviceName(device.hDevice);
+                string deviceName = RawInput.GetRawInputDeviceInterfaceName(device.hDevice);
                 if (deviceName.Equals(Path))
                 {
                     return device.hDevice;

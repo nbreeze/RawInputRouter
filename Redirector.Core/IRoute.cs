@@ -1,5 +1,4 @@
-﻿using RawInputRouter.Imports;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -8,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
-namespace RawInputRouter.Routing
+namespace Redirector.Core
 {
     public interface IRoute : INotifyPropertyChanged
     {
@@ -18,7 +17,9 @@ namespace RawInputRouter.Routing
 
         public ObservableCollection<IOutputAction> Actions { get; }
 
-        public IRouteInputFilter InputFilter { get; set; }
+        public ObservableCollection<IRouteTrigger> Triggers { get; }
+
+        public bool ShouldTrigger(IDeviceSource source, DeviceInput input);
 
         public void OnInput(IDeviceSource source, DeviceInput input);
 

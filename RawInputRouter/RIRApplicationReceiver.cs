@@ -1,17 +1,15 @@
-﻿using RawInputRouter.Imports;
-using RawInputRouter.Routing;
+﻿using PInvoke;
+using Redirector.Core;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows.Data;
 
 namespace RawInputRouter
 {
-    public enum ProcessWindowTitleSearch
+    public enum WindowTitleSearchMethod
     {
         Exact,
         Match,
@@ -20,17 +18,17 @@ namespace RawInputRouter
 
     public class ProcessWindowTitleSearchEnumConverter : IValueConverter
     {
-        internal static Dictionary<ProcessWindowTitleSearch, string> ProcessWindowTitleSearchNames = new Dictionary<ProcessWindowTitleSearch, string>()
+        internal static Dictionary<WindowTitleSearchMethod, string> ProcessWindowTitleSearchNames = new Dictionary<WindowTitleSearchMethod, string>()
             {
-                { ProcessWindowTitleSearch.Exact, "Exact" },
-                { ProcessWindowTitleSearch.Match, "Match" },
-                { ProcessWindowTitleSearch.Regex, "Regex" }
+                { WindowTitleSearchMethod.Exact, "Exact" },
+                { WindowTitleSearchMethod.Match, "Match" },
+                { WindowTitleSearchMethod.Regex, "Regex" }
             };
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             string name = "";
-            ProcessWindowTitleSearchNames.TryGetValue((ProcessWindowTitleSearch)value, out name);
+            ProcessWindowTitleSearchNames.TryGetValue((WindowTitleSearchMethod)value, out name);
             return name;
         }
 
@@ -45,8 +43,8 @@ namespace RawInputRouter
         private string _WindowTitleSearch;
         public string WindowTitleSearch { get => _WindowTitleSearch; set => SetProperty(ref _WindowTitleSearch, value); }
 
-        private ProcessWindowTitleSearch _WindowTitleSearchMethod;
-        public ProcessWindowTitleSearch WindowTitleSearchMethod { get => _WindowTitleSearchMethod; set => SetProperty(ref _WindowTitleSearchMethod, value); }
+        private WindowTitleSearchMethod _WindowTitleSearchMethod;
+        public WindowTitleSearchMethod WindowTitleSearchMethod { get => _WindowTitleSearchMethod; set => SetProperty(ref _WindowTitleSearchMethod, value); }
 
         private Regex _Regex = null;
 
@@ -65,7 +63,7 @@ namespace RawInputRouter
 
         private void UpdateRegex()
         {
-            if (WindowTitleSearchMethod != ProcessWindowTitleSearch.Regex || string.IsNullOrEmpty(WindowTitleSearch))
+            if (WindowTitleSearchMethod != WindowTitleSearchMethod.Regex || string.IsNullOrEmpty(WindowTitleSearch))
             {
                 _Regex = null;
                 return;
@@ -77,17 +75,19 @@ namespace RawInputRouter
 
         public override bool IsMatchingWindow(IntPtr handle)
         {
-            StringBuilder windowTitle = new StringBuilder(260);
-            User32.GetWindowText(handle, windowTitle, 260);
+            char[] windowTitle = new char[260];
+            User32.GetWindowText(handle, windowTitle, windowTitle.Length);
+
+            string title = new string(windowTitle).Replace("\0", "");
 
             switch (WindowTitleSearchMethod)
             {
-                case ProcessWindowTitleSearch.Exact:
-                    return windowTitle.ToString().Equals(WindowTitleSearch);
-                case ProcessWindowTitleSearch.Match:
-                    return windowTitle.ToString().Contains(WindowTitleSearch);
-                case ProcessWindowTitleSearch.Regex:
-                    return _Regex != null && _Regex.IsMatch(windowTitle.ToString());
+                case WindowTitleSearchMethod.Exact:
+                    return title.Equals(WindowTitleSearch);
+                case WindowTitleSearchMethod.Match:
+                    return title.Contains(WindowTitleSearch);
+                case WindowTitleSearchMethod.Regex:
+                    return _Regex != null && _Regex.IsMatch(title.ToString());
                 default:
                     break;
             }

@@ -1,24 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using RawInputRouter.Imports;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Threading;
+using PInvoke;
+using Redirector.Native;
 
-namespace RawInputRouter.Routing
+namespace Redirector.Core
 {
-    public class RawInputInfo
-    {
-        public User32.RawInputType Type;
-        public User32.RAWINPUTHEADER Header = new();
-        public User32.RAWMOUSE Mouse = new();
-        public User32.RAWKEYBOARD Keyboard = new();
-        public User32.RAWHID HID = new();
-    }
-
     public class RoutingManager : ObservableObject, IRoutingManager
     {
         public virtual ObservableCollection<IDeviceSource> Devices { get; } = new();
@@ -37,8 +26,7 @@ namespace RawInputRouter.Routing
 
         public virtual void ProcessWindowMessage(IntPtr wParam, IntPtr lParam)
         {
-            WinMsgIntercept.CBT cbt = new();
-            WinMsgIntercept.GetCBT(ref cbt);
+            WinMsgIntercept.GetCBT(out var cbt);
 
             IEnumerable<IApplicationReceiver> apps = null;
 
@@ -73,35 +61,34 @@ namespace RawInputRouter.Routing
         public virtual bool ProcessRawInputMessage(IntPtr wParam, IntPtr lParam)
         {
             int tickCount = Environment.TickCount;
-            RawInputInfo info = new();
-            User32.GetRawInputData(lParam, ref info.Header, ref info.Mouse, ref info.Keyboard, ref info.HID);
-            info.Type = (User32.RawInputType)info.Header.dwType;
+            RawInput.RAWINPUT info = new();
+            RawInput.GetRawInputData(lParam, ref info);
 
             DeviceInput input = null;
 
-            switch (info.Type)
+            switch (info.header.dwType)
             {
-                case User32.RawInputType.Keyboard:
+                case RawInput.RawInputType.Keyboard:
 
                     // Correct the raw input mess
                     // https://blog.molecular-matters.com/2011/09/05/properly-handling-keyboard-input/
 
-                    int scanCode = info.Keyboard.MakeCode;
-                    User32.VK virtualKey = (User32.VK)info.Keyboard.VKey;
-                    bool isE0 = (info.Keyboard.Flags & User32.RI_KEY_E0) != 0;
-                    bool isE1 = (info.Keyboard.Flags & User32.RI_KEY_E1) != 0;
+                    int scanCode = info.keyboard.MakeCode;
+                    User32.VirtualKey virtualKey = (User32.VirtualKey)info.keyboard.VKey;
+                    bool isE0 = (info.keyboard.Flags & RawInput.RI_KEY_E0) != 0;
+                    bool isE1 = (info.keyboard.Flags & RawInput.RI_KEY_E1) != 0;
 
                     switch (virtualKey)
                     {
-                        case (User32.VK)255:
+                        case (User32.VirtualKey)255:
                             return false; // Discard "fake keys"
-                        case User32.VK.SHIFT:
+                        case User32.VirtualKey.VK_SHIFT:
                             // Correct left-hand / right-hand SHIFT
-                            virtualKey = (User32.VK)User32.MapVirtualKey((uint)scanCode, (uint)virtualKey);
+                            virtualKey = (User32.VirtualKey)User32.MapVirtualKey(scanCode, (User32.MapVirtualKeyTranslation)virtualKey);
                             break;
-                        case User32.VK.NUMLOCK:
+                        case User32.VirtualKey.VK_NUMLOCK:
                             // Correct PAUSE/BREAK and NUM LOCK silliness, and set the extended bit
-                            scanCode = (int)User32.MapVirtualKey((uint)virtualKey, User32.MAPVK_VK_TO_VSC) | 0x100;
+                            scanCode = User32.MapVirtualKey((int)virtualKey, User32.MapVirtualKeyTranslation.MAPVK_VK_TO_VSC) | 0x100;
                             break;
                     }
 
@@ -109,20 +96,20 @@ namespace RawInputRouter.Routing
                     {
                         // For escaped sequences, turn the virtual key into the correct scan code using MapVirtualKey.
                         // However, MapVirtualKey is unable to map VK_PAUSE (this is a known bug), hence we map that by hand.
-                        if (virtualKey == User32.VK.PAUSE)
+                        if (virtualKey == User32.VirtualKey.VK_PAUSE)
                             scanCode = 0x45;
                         else
-                            scanCode = (int)User32.MapVirtualKey((uint)virtualKey, User32.MAPVK_VK_TO_VSC);
+                            scanCode = User32.MapVirtualKey((int)virtualKey, User32.MapVirtualKeyTranslation.MAPVK_VK_TO_VSC);
                     }
 
                     input = new KeyboardDeviceInput()
                     {
-                        DeviceHandle = info.Header.hDevice,
+                        DeviceHandle = info.header.hDevice,
                         Time = tickCount,
                         VKey = (int)virtualKey,
                         ScanCode = scanCode,
                         Extended = isE0,
-                        IsKeyDown = info.Keyboard.Message == User32.WM_KEYDOWN
+                        IsKeyDown = info.keyboard.Message == (int)User32.WindowMessage.WM_KEYDOWN
                     };
                     break;
             }
@@ -142,55 +129,51 @@ namespace RawInputRouter.Routing
         public virtual bool ProcessKeyboardInterceptMessage(IntPtr wParam, IntPtr lParam)
         {
             int tickCount = Environment.TickCount;
-            
-            WinMsgIntercept.KeyboardInput keyboardInput = new();
-            WinMsgIntercept.GetKeyboardInput(ref keyboardInput);
+
+            WinMsgIntercept.GetKeyboardInput(out var keyboardInput);
 
             // Can't directly cast from IntPtr -> int on 64-bit, otherwise we'll get an OverflowException.
             // Pain.
-            int virtualKey = IntPtr.Size == 8 ? (int)(ulong)wParam : (int)wParam; 
-            uint flags = IntPtr.Size == 8 ? (uint)(ulong)lParam : (uint)lParam;
+            int virtualKey = Environment.Is64BitProcess ? (int)(ulong)wParam : (int)wParam;
+            uint flags = Environment.Is64BitProcess ? (uint)(ulong)lParam : (uint)lParam;
 
             KeyboardDeviceInput input = new()
             {
                 Time = tickCount,
                 VKey = virtualKey,
-                ScanCode = (int)((flags >> 16) & 0xFF),
-                Extended = (flags & (1 << 24)) > 0,
-                IsKeyDown = (flags & (0x1 << 31)) == 0
+                ScanCode = (int)(flags >> 16 & 0xFF),
+                Extended = (flags & 1 << 24) > 0,
+                IsKeyDown = (flags & 1 << 31) == 0
             };
 
             CleanInputBuffer();
 
-            DeviceInput matchedInput = MatchBufferDeviceInput(input);
-
-            // Handle edge case where holding doing key repeatedly might "leak"
-            if (matchedInput == null && input.IsKeyDown)
-            {
-                // Try to see if any device is currently holding the key.
-                IDeviceSource matchedSource = Devices.Where(d => d.State.GetVirtualKeyState(input))
-                    .FirstOrDefault();
-
-                if (matchedSource != null)
-                {
-                    // dumb but works
-                    input.DeviceHandle = matchedSource.Handle;
-                    matchedInput = input;
-                }
-            }
-
+            DeviceInput matchedInput = MatchDeviceInputInBuffer(input);
             if (matchedInput != null)
             {
-                // Find device that made the input.
-                IDeviceSource matchedSource = Devices.Where(d => d.Handle == matchedInput.DeviceHandle)
-                    .FirstOrDefault();
+                InputBuffer.Remove(matchedInput);
 
-                if (matchedSource != null)
+                // Find device source that made the input. This should not be null.
+                IDeviceSource source = Devices.Where(d => d.Handle == matchedInput.DeviceHandle)
+                    .First();
+
+                return ShouldBlockOriginalInput(source, matchedInput);
+            }
+            else
+            {
+                // Handle edge case where holding down key repeatedly might "leak"
+                if (input.IsKeyDown)
                 {
-                    InputBuffer.Remove(matchedInput);
-                }
+                    // Try to see if a device is currently holding the key.
+                    IDeviceSource source = Devices.Where(d => d.State.GetVirtualKeyState(input))
+                        .FirstOrDefault();
 
-                return ShouldBlockOriginalInput(matchedSource, matchedInput);
+                    if (source != null)
+                    {
+                        input.DeviceHandle = source.Handle;
+                        return ShouldBlockOriginalInput(source, input);
+                    }
+                }
             }
 
             return false;
@@ -204,7 +187,7 @@ namespace RawInputRouter.Routing
             switch (msgType)
             {
                 case 1: // GIDC_ARRIVAL
-                    string deviceName = User32.GetRawInputDeviceName(lParam);
+                    string deviceName = RawInput.GetRawInputDeviceInterfaceName(lParam);
                     device = Devices.Where(d => d.Path.Equals(deviceName)).FirstOrDefault();
                     if (device != null)
                     {
@@ -261,7 +244,7 @@ namespace RawInputRouter.Routing
 
             foreach (DeviceInput input in InputBuffer)
             {
-                if ((Environment.TickCount - input.Time) > 5000)
+                if (Environment.TickCount - input.Time > 5000)
                 {
                     removeInputs.Add(input);
                 }
@@ -274,7 +257,7 @@ namespace RawInputRouter.Routing
             InputBuffer.RemoveAll(input => removeInputs.Contains(input));
         }
 
-        protected virtual DeviceInput MatchBufferDeviceInput(DeviceInput bufferInput)
+        protected virtual DeviceInput MatchDeviceInputInBuffer(DeviceInput bufferInput)
         {
             DeviceInput matchedInput = InputBuffer.SkipWhile(input => !input.Matches(bufferInput))
                 .FirstOrDefault();

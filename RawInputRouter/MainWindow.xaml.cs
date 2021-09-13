@@ -1,25 +1,16 @@
-﻿using RawInputRouter.Imports;
-using RawInputRouter.Routing;
+﻿using PInvoke;
+using Redirector.Core;
+using Redirector.Native;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Interop;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace RawInputRouter
 {
@@ -50,17 +41,17 @@ namespace RawInputRouter
             Process process = Process.GetCurrentProcess();
             IntPtr hWnd = new WindowInteropHelper(this).EnsureHandle();
 
-            if (!User32.RegisterRawInputDevices(new List<User32.RAWINPUTDEVICE>()
+            if (!RawInput.RegisterRawInputDevices( new[]
                 {
                     // Keyboard
-                    new User32.RAWINPUTDEVICE()
+                    new RawInput.RAWINPUTDEVICE()
                     {
-                        usUsagePage = 0x1,
-                        usUsage = 0x6,
-                        dwFlags = 0x100 | 0x2000, // RIDEV_INPUTSINK | RIDEV_DEVNOTIFY
-                        hwndTarget = hWnd
+                        UsagePage = RawInput.HIDUsagePage.Generic,
+                        Usage = RawInput.HIDUsage.Keyboard,
+                        Flags = RawInput.RawInputDeviceFlags.InputSink |  RawInput.RawInputDeviceFlags.DevNotify,
+                        WindowHandle = hWnd
                     }
-                }))
+                }, 1, Marshal.SizeOf(typeof(RawInput.RAWINPUTDEVICE))))
             {
                 User32.MessageBox(hWnd, "FATAL ERROR! RegisterRawInputDevices failed.", null, 0);
                 process.Kill();
@@ -87,11 +78,11 @@ namespace RawInputRouter
             //  do stuff
             switch (msg)
             {
-                case 0xfe: // WM_INPUT_DEVICE_CHANGE
+                case (int)User32.WindowMessage.WM_INPUT_DEVICE_CHANGE: // WM_INPUT_DEVICE_CHANGE
                     Instance.InputManager.ProcessRawInputDeviceChangedMessage(wParam, lParam);
                     break;
 
-                case 0xff: // WM_INPUT
+                case (int)User32.WindowMessage.WM_INPUT: // WM_INPUT
                     if (Instance.IsInCaptureMode)
                     {
                         Instance.CaptureWindow?.ProcessRawInputMessage(wParam, lParam);
@@ -283,10 +274,12 @@ namespace RawInputRouter
             {
                 Source = InputManager.Devices.FirstOrDefault(),
                 Destination = InputManager.Applications.FirstOrDefault(),
-                InputFilter = new KeyboardRouteInputFilter()
-                {
-                    KeyState = KeyboardRouteInputKeyState.Down,
-                    Key = Key.PageDown
+                Triggers = {
+                    new KeyboardRouteTrigger()
+                    {
+                        KeyState = KeyboardRouteInputKeyState.Down,
+                        Key = Key.PageDown
+                    } 
                 },
                 Actions =
                 {
@@ -301,10 +294,12 @@ namespace RawInputRouter
             {
                 Source = InputManager.Devices.FirstOrDefault(),
                 Destination = InputManager.Applications.FirstOrDefault(),
-                InputFilter = new KeyboardRouteInputFilter()
-                {
-                    KeyState = KeyboardRouteInputKeyState.Down,
-                    Key = Key.PageUp
+                Triggers = {
+                    new KeyboardRouteTrigger()
+                    {
+                        KeyState = KeyboardRouteInputKeyState.Down,
+                        Key = Key.PageUp
+                    } 
                 },
                 Actions =
                 {

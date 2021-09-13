@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace RawInputRouter.Routing
+namespace Redirector.Core
 {
     public interface IApplicationReceiver
     {

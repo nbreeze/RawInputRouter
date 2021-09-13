@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace RawInputRouter.Routing
+namespace Redirector.Core
 {
     public abstract class OutputAction : ObservableObject, IOutputAction
     {
