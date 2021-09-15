@@ -1,27 +1,64 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using PInvoke;
+using Redirector.Native;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using PInvoke;
-using Redirector.Native;
 
-namespace Redirector.Core
+namespace Redirector.Core.Windows
 {
-    public class RoutingManager : ObservableObject, IRoutingManager
+    public class Win32Redirector : Redirector, IWin32Redirector
     {
-        public virtual ObservableCollection<IDeviceSource> Devices { get; } = new();
+        /// <summary>
+        /// Stores the inputs retrieved via raw input.
+        /// 
+        /// <para>
+        /// WM_INPUT messages contain raw input data, along with a Handle of the
+        /// device that sent the input. However, keyboard hooks such as
+        /// WH_KEYBOARD and WH_KEYBOARD_LL do not contain information about the
+        /// device that sent the input, and those hooks are the only hooks that
+        /// can reliably intercept and block input.
+        /// </para>
+        /// 
+        /// <para>
+        /// In order to block input on a per device basis, the input gained from
+        /// those hooks have to be matched with an input stored in the input
+        /// buffer. If the input is matched, then we can somewhat determine the
+        /// device the input can from.
+        /// </para>
+        /// </summary>
+        protected List<DeviceInput> InputBuffer = new();
 
-        public virtual ObservableCollection<IApplicationReceiver> Applications { get; } = new();
-
-        public virtual ObservableCollection<IRoute> Routes { get; } = new();
-
-        private List<DeviceInput> InputBuffer = new();
-
-        public RoutingManager() : base()
+        public override void OnInput(IDeviceSource source, DeviceInput input)
         {
-            Devices.CollectionChanged += OnDevicesCollectionChanged;
-            Applications.CollectionChanged += OnWindowsCollectionChanged;
+            InputBuffer.Add(input);
+            base.OnInput(source, input);
+        }
+
+        protected void CleanInputBuffer()
+        {
+            List<DeviceInput> removeInputs = new List<DeviceInput>();
+
+            foreach (DeviceInput input in InputBuffer)
+            {
+                if (Environment.TickCount - input.Time > 5000)
+                {
+                    removeInputs.Add(input);
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            InputBuffer.RemoveAll(input => removeInputs.Contains(input));
+        }
+
+        protected virtual DeviceInput MatchDeviceInputInBuffer(DeviceInput bufferInput)
+        {
+            DeviceInput matchedInput = InputBuffer.SkipWhile(input => !input.Matches(bufferInput))
+                .FirstOrDefault();
+
+            return matchedInput;
         }
 
         public virtual void ProcessWindowMessage(IntPtr wParam, IntPtr lParam)
@@ -50,7 +87,7 @@ namespace Redirector.Core
                         if (app != null)
                         {
                             app.Handle = IntPtr.Zero;
-                            app.Process = null;
+                            app.ProcessId = 0;
                         }
                     }
 
@@ -207,108 +244,14 @@ namespace Redirector.Core
             }
         }
 
-        public virtual void OnInput(IDeviceSource source, DeviceInput input)
+        public virtual void OnWindowTextChanged(IntPtr hWnd)
         {
-            InputBuffer.Add(input);
-
-            source.OnInput(input);
-
-            DispatchInputToRoutes(source, input);
-        }
-
-        protected void DispatchInputToRoutes(IDeviceSource source, DeviceInput input)
-        {
-            foreach (IRoute route in Routes)
+            foreach (var app in Applications)
             {
-                route.OnInput(source, input);
-            }
-        }
+                if (User32.IsWindow(app.Handle))
+                    continue;
 
-        public virtual bool ShouldBlockOriginalInput(IDeviceSource source, DeviceInput input)
-        {
-            if (source.ShouldBlockOriginalInput(input))
-                return true;
-
-            foreach (IRoute route in Routes)
-            {
-                if (route.ShouldBlockOriginalInput(source, input))
-                    return true;
-            }
-
-            return false;
-        }
-
-        protected void CleanInputBuffer()
-        {
-            List<DeviceInput> removeInputs = new List<DeviceInput>();
-
-            foreach (DeviceInput input in InputBuffer)
-            {
-                if (Environment.TickCount - input.Time > 5000)
-                {
-                    removeInputs.Add(input);
-                }
-                else
-                {
-                    break;
-                }
-            }
-
-            InputBuffer.RemoveAll(input => removeInputs.Contains(input));
-        }
-
-        protected virtual DeviceInput MatchDeviceInputInBuffer(DeviceInput bufferInput)
-        {
-            DeviceInput matchedInput = InputBuffer.SkipWhile(input => !input.Matches(bufferInput))
-                .FirstOrDefault();
-
-            return matchedInput;
-        }
-
-        protected virtual void OnWindowsCollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        {
-            if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Remove)
-            {
-                foreach (var item in e.OldItems)
-                {
-                    ApplicationReceiver window = (ApplicationReceiver)item;
-
-                    if (window == null)
-                        continue;
-
-                    window.OnDelete();
-
-                    foreach (var route in Routes)
-                    {
-                        if (route.Destination == window)
-                        {
-                            route.Destination = null;
-                        }
-                    }
-                }
-            }
-        }
-
-        protected virtual void OnDevicesCollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        {
-            if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Remove)
-            {
-                foreach (var item in e.OldItems)
-                {
-                    IDeviceSource source = item as IDeviceSource;
-                    if (source == null)
-                        continue;
-
-                    source.OnDelete();
-
-                    foreach (var route in Routes)
-                    {
-                        if (route.Source == source)
-                        {
-                            route.Source = null;
-                        }
-                    }
-                }
+                app.FindWindow();
             }
         }
     }

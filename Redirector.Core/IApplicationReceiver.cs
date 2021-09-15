@@ -12,7 +12,7 @@ namespace Redirector.Core
 
         public string Name { get; set; }
 
-        public Process Process { get; set; }
+        public int ProcessId { get; set; }
 
         public IEnumerable<Process> FindProcesses();
 

@@ -10,7 +10,7 @@ namespace UnitTests
 {
     public class TestPPTRouting
     {
-        private class TestRouter : RoutingManager
+        private class TestRouter : Redirector.Core.Redirector
         {
         }
 
@@ -47,7 +47,7 @@ namespace UnitTests
             }
         }
 
-        private RoutingManager Router = new TestRouter();
+        private IRedirector Router = new TestRouter();
 
         private Microsoft.Office.Interop.PowerPoint.Application PowerPoint;
         private Microsoft.Office.Interop.PowerPoint.Presentation ppPresentation; 

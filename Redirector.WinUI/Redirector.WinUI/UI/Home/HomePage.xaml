@@ -1,0 +1,81 @@
+﻿<Page
+    x:Class="Redirector.WinUI.UI.Home.HomePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:root="using:Redirector.WinUI"
+    xmlns:local="using:Redirector.WinUI.UI.Home"
+    xmlns:sys="using:System"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <ScrollViewer HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <StackPanel>
+                <Button Click="OnClickAddDeviceButton" Background="{ThemeResource ListViewItemOverlayBackgroundThemeBrush}"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Left"
+                    Padding="12,12">
+                    <StackPanel Orientation="Horizontal">
+                        <Grid BorderBrush="{ThemeResource ButtonForegroundThemeBrush}" BorderThickness="2" Width="40" Height="40" Margin="0,0,12,0">
+                            <SymbolIcon Symbol="Add"/>
+                        </Grid>
+
+                        <TextBlock>Add Device Source</TextBlock>
+                    </StackPanel>
+                </Button>
+
+                <ListView ItemsSource="{x:Bind Sources, Mode=OneWay}">
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="root:WinUIDeviceSource">
+                            <ListViewItem>
+                                <Grid ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="40"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="1">
+                                        <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind Name, Mode=OneWay}"/>
+                                        <TextBlock Text="{x:Bind Path, Mode=OneWay}" TextWrapping="NoWrap"/>
+                                        <TextBlock Text="{x:Bind sys:String.Format('{0:x}',Handle), Mode=OneWay}"/>
+                                    </StackPanel>
+                                    <SymbolIcon Grid.Column="0" Width="40" Height="40" Symbol="Keyboard"/>
+                                </Grid>
+                                <ListViewItem.ContextFlyout>
+                                    <MenuFlyout>
+                                        <MenuFlyout.Items>
+                                            <MenuFlyoutItem Click="OnClickRefreshDeviceMenuButton" Tag="{x:Bind}">
+                                                <MenuFlyoutItem.Icon>
+                                                    <SymbolIcon Symbol="Refresh"/>
+                                                </MenuFlyoutItem.Icon>
+                                                Refresh
+                                            </MenuFlyoutItem>
+                                            <MenuFlyoutItem Click="OnClickEditDeviceMenuButton" Tag="{x:Bind}">
+                                                <MenuFlyoutItem.Icon>
+                                                    <SymbolIcon Symbol="Edit"/>
+                                                </MenuFlyoutItem.Icon>
+                                                Edit
+                                            </MenuFlyoutItem>
+                                            <MenuFlyoutItem Click="OnClickDeleteDeviceMenuButton" Tag="{x:Bind}">
+                                                <MenuFlyoutItem.Icon>
+                                                    <SymbolIcon Symbol="Delete"/>
+                                                </MenuFlyoutItem.Icon>
+                                                Delete
+                                            </MenuFlyoutItem>
+                                        </MenuFlyout.Items>
+                                    </MenuFlyout>
+                                </ListViewItem.ContextFlyout>
+                            </ListViewItem>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="{x:Bind ShouldShowNoDevicesPage(Sources.Count), Mode=OneWay}">
+            <TextBlock HorizontalTextAlignment="Center" VerticalAlignment="Center">No devices registered. To start, <Hyperlink Click="OnClickNewDeviceHyperlink">register a new device.</Hyperlink></TextBlock>
+        </Grid>
+    </Grid>
+    
+</Page>

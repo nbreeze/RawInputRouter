@@ -1,5 +1,6 @@
 ﻿using PInvoke;
 using Redirector.Core;
+using Redirector.Core.Windows;
 using Redirector.Native;
 using System;
 using System.Collections.Generic;
@@ -21,7 +22,7 @@ namespace RawInputRouter
     {
         public static MainWindow Instance { get; private set; } = null;
 
-        public IRoutingManager InputManager { get; } = new RIRRoutingManager();
+        public IWin32Redirector InputManager { get; } = new RIRRedirector();
 
         public static readonly DependencyProperty IsInCaptureModeProperty = DependencyProperty.Register(
             "IsInCaptureMode",

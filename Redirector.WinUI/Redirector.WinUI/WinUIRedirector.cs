@@ -1,19 +1,18 @@
-﻿using System;
-using System.Windows;
-using System.Windows.Controls;
-using System.Threading.Tasks;
-using Redirector.Core;
-using Redirector.Native;
+﻿using Microsoft.UI.Xaml;
 using PInvoke;
+using Redirector.Core.Windows;
+using Redirector.Native;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace RawInputRouter
+namespace Redirector.WinUI
 {
-    public class RIRRoutingManager : RoutingManager
+    public class WinUIRedirector : Win32Redirector
     {
-        public RIRRoutingManager() : base()
-        {
-        }
-
         public override void ProcessWindowMessage(IntPtr wParam, IntPtr lParam)
         {
             base.ProcessWindowMessage(wParam, lParam);
@@ -41,7 +40,7 @@ namespace RawInputRouter
                             Task.Delay(5000).ContinueWith(task =>
                             {
                                 // Make sure we're running on UI thread.
-                                MainWindow.Instance.Dispatcher.Invoke(() =>
+                                Window.Current.DispatcherQueue.TryEnqueue(() =>
                                 {
                                     foreach (var app in Applications)
                                     {
@@ -57,33 +56,6 @@ namespace RawInputRouter
 
                     break;
             }
-        }
-
-        public override void OnInput(IDeviceSource source, DeviceInput input)
-        {
-            base.OnInput(source, input);
-        }
-
-        protected override DeviceInput MatchDeviceInputInBuffer(DeviceInput input)
-        {
-            return base.MatchDeviceInputInBuffer(input);
-        }
-
-        public override bool ShouldBlockOriginalInput(IDeviceSource source, DeviceInput input)
-        {
-            return base.ShouldBlockOriginalInput(source, input);
-        }
-    }
-
-    public class InputRouteDataTemplateSelector : DataTemplateSelector
-    {
-        public DataTemplate MouseTemplate { get; set; } = null;
-        public DataTemplate KeyboardTemplate { get; set; } = null;
-        public DataTemplate HidTemplate { get; set; } = null;
-
-        public override DataTemplate SelectTemplate(object item, DependencyObject container)
-        {
-            return null;
         }
     }
 }

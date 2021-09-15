@@ -22,8 +22,8 @@ namespace Redirector.Core
         private IntPtr _Handle = IntPtr.Zero;
         public virtual IntPtr Handle { get => _Handle; set => SetProperty(ref _Handle, value); }
 
-        private Process _Process = null;
-        public virtual Process Process { get => _Process; set => SetProperty(ref _Process, value); }
+        private int _ProcessId = 0;
+        public virtual int ProcessId { get => _ProcessId; set => SetProperty(ref _ProcessId, value); }
 
         public virtual IEnumerable<Process> FindProcesses()
         {
@@ -70,15 +70,11 @@ namespace Redirector.Core
                 if (Handle != IntPtr.Zero)
                 {
                     User32.GetWindowThreadProcessId(Handle, out int processId);
-                    Process = Process.GetProcessById(processId);
+                    ProcessId = processId;
                 }
                 else
                 {
-                    if (Process != null)
-                    {
-                        Process.Dispose();
-                        Process = null;
-                    }
+                    ProcessId = 0;
                 }
             }
             finally
