@@ -31,6 +31,8 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="UI\ApplicationSettingsDialog.xaml" />
+    <None Remove="UI\ApplicationsPage.xaml" />
     <None Remove="UI\DeviceSettingsDialog.xaml" />
     <None Remove="UI\Home\HomePage.xaml" />
     <None Remove="UI\TopLevelPage.xaml" />
@@ -50,6 +52,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Page Update="UI\ApplicationSettingsDialog.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="UI\DeviceSettingsDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -69,5 +75,11 @@
 
   <ItemGroup>
     <Folder Include="Themes\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="UI\ApplicationsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
 </Project>

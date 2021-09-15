@@ -23,10 +23,6 @@ namespace Redirector.WinUI.UI
     {
         public WinUIDeviceSource Source { get; set; }
 
-        public WinUIDeviceSource DestinationSource { get; set; }
-
-        public bool IsEditing { get; set; }
-
         public DeviceSettingsDialog()
         {
             this.InitializeComponent();

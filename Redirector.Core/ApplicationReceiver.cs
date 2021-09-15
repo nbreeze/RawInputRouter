@@ -28,7 +28,7 @@ namespace Redirector.Core
         public virtual IEnumerable<Process> FindProcesses()
         {
             if (string.IsNullOrEmpty(ExecutableName))
-                return null;
+                return Array.Empty<Process>();
 
             string executableName = ExecutableName;
             string extension = Path.GetExtension(ExecutableName);

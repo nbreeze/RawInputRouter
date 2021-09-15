@@ -29,7 +29,7 @@ namespace Redirector.WinUI.UI.Home
     /// </summary>
     public sealed partial class HomePage : Page
     {
-        public ReadOnlyObservableCollection<IDeviceSource> Sources { get; } = new ReadOnlyObservableCollection<IDeviceSource>(App.Current.Redirector.Devices);
+        public ObservableCollection<IDeviceSource> Sources => App.Current.Redirector.Devices;
 
         public HomePage()
         {
@@ -43,52 +43,47 @@ namespace Redirector.WinUI.UI.Home
             App.Current.ViewModel.TopLevelHeader = "Devices";
         }
 
-        private Visibility ShouldShowNoDevicesPage(int sourcesCount)
+        private async Task ShowDeviceSettingsDialog(WinUIDeviceSource dest = null)
         {
-            return sourcesCount > 0 ? Visibility.Collapsed : Visibility.Visible;
-        }
-
-        private async Task ShowDeviceSettingsDialog(WinUIDeviceSource destinationSource = null)
-        {
-            var dialog = new DeviceSettingsDialog()
+            DeviceSettingsDialog dialog = new DeviceSettingsDialog()
             {
                 Source = new WinUIDeviceSource()
                 {
-                    Name = $"Device {App.Current.Redirector.Devices.Count + 1}"
+                    Name = $"Device {Sources.Count + 1}"
                 },
-                DestinationSource = destinationSource,
-                IsEditing = destinationSource != null,
                 XamlRoot = Content.XamlRoot
             };
 
-            if (dialog.IsEditing)
-            {
-                dialog.Title = "Edit Device Source";
+            WinUIDeviceSource source = dialog.Source;
 
-                dialog.Source.Name = destinationSource.Name;
-                dialog.Source.Path = destinationSource.Path;
-                dialog.Source.Handle = destinationSource.Handle;
-                dialog.Source.BlockOriginalInput = destinationSource.BlockOriginalInput;
+            if (dest != null)
+            {
+                dialog.Title = "Edit device source";
+
+                source.Name = dest.Name;
+                source.Path = dest.Path;
+                source.Handle = dest.Handle;
+                source.BlockOriginalInput = dest.BlockOriginalInput;
             }
             else
             {
-                dialog.Title = "Add Device Source";
+                dialog.Title = "Add device source";
             }
 
             var result = await dialog.ShowAsync();
 
             if (result == ContentDialogResult.Primary)
             {
-                if (dialog.IsEditing)
+                if (dest != null)
                 {
-                    destinationSource.Name = dialog.Source.Name;
-                    destinationSource.Path = dialog.Source.Path;
-                    destinationSource.Handle = dialog.Source.Handle;
-                    destinationSource.BlockOriginalInput = dialog.Source.BlockOriginalInput;
+                    dest.Name = source.Name;
+                    dest.Path = source.Path;
+                    dest.Handle = source.Handle;
+                    dest.BlockOriginalInput = source.BlockOriginalInput;
                 }
                 else
                 {
-                    App.Current.Redirector.Devices.Add(dialog.Source);
+                    Sources.Add(dialog.Source);
                 }
             }
         }
@@ -130,7 +125,7 @@ namespace Redirector.WinUI.UI.Home
                 PrimaryButtonText = "OK",
                 CloseButtonText = "Cancel",
                 DefaultButton = ContentDialogButton.Close,
-                Title = "Delete Device Source",
+                Title = "Delete device source",
                 Content = $"Are you sure you want to delete '{source.Name}'? This action is irreversible!",
                 XamlRoot = Content.XamlRoot
             };
@@ -140,7 +135,7 @@ namespace Redirector.WinUI.UI.Home
             switch (result)
             {
                 case ContentDialogResult.Primary:
-                    App.Current.Redirector.Devices.Remove(source);
+                    Sources.Remove(source);
                     break;
             }
         }

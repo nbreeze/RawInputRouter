@@ -70,12 +70,11 @@ namespace Redirector.WinUI.UI
 
             switch (item.Title)
             {
-                case "Home":
-                    break;
                 case "Devices":
                     ContentFrame.Navigate(typeof(HomePage));
                     break;
                 case "Applications":
+                    ContentFrame.Navigate(typeof(ApplicationsPage));
                     break;
             }
         }
