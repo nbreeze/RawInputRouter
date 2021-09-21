@@ -10,7 +10,7 @@ namespace Redirector.Core.Windows
     {
         public void ProcessRawInputDeviceChangedMessage(IntPtr wParam, IntPtr lParam);
 
-        public bool ProcessRawInputMessage(IntPtr wParam, IntPtr lParam);
+        public void ProcessRawInputMessage(IntPtr wParam, IntPtr lParam);
 
         public void ProcessWindowMessage(IntPtr wParam, IntPtr lParam);
 

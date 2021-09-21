@@ -5,16 +5,17 @@ using System.IO;
 using System.Threading;
 using PInvoke;
 using System.Linq;
+using Redirector.Core.Windows;
 
 namespace UnitTests
 {
     public class TestPPTRouting
     {
-        private class TestRouter : Redirector.Core.Redirector
+        private class TestRouter : Win32Redirector
         {
         }
 
-        private class TestWindow : ApplicationReceiver
+        private class TestWindow : Win32ApplicationReceiver
         {
             public override bool IsMatchingWindow(IntPtr handle)
             {
@@ -33,7 +34,7 @@ namespace UnitTests
 
             public override bool ShouldTrigger(IRoute route, IDeviceSource source, DeviceInput input)
             {
-                KeyboardDeviceInput kbInput = input as KeyboardDeviceInput;
+                Win32KeyboardDeviceInput kbInput = input as Win32KeyboardDeviceInput;
                 if (kbInput == null)
                     return false;
 
@@ -86,7 +87,7 @@ namespace UnitTests
         [Test]
         public void TestNextPrevPPTSlide()
         {
-            ApplicationReceiver window = new TestWindow()
+            Win32ApplicationReceiver window = new TestWindow()
             {
                 Name = "PowerPoint",
                 ExecutableName = "powerpnt.exe",
@@ -97,7 +98,7 @@ namespace UnitTests
             window.Handle = window.FindWindow();
             Assert.IsTrue(window.Handle != IntPtr.Zero);
 
-            IDeviceSource device = new DeviceSource()
+            IDeviceSource device = new Win32DeviceSource()
             {
                 Handle = (IntPtr)1
             };
@@ -117,7 +118,7 @@ namespace UnitTests
                 },
                 Actions =
                 {
-                    new AcceleratorOutputAction()
+                    new Win32AcceleratorOutputAction()
                     {
                         Accelerator = 393
                     }
@@ -137,7 +138,7 @@ namespace UnitTests
                 },
                 Actions =
                 {
-                    new AcceleratorOutputAction()
+                    new Win32AcceleratorOutputAction()
                     {
                         Accelerator = 394
                     }
@@ -146,7 +147,7 @@ namespace UnitTests
 
             int expectedSlideIndex = ppPresentation.SlideShowWindow.View.Slide.SlideIndex + 1;
 
-            Router.OnInput(device, new KeyboardDeviceInput()
+            Router.OnInput(device, new Win32KeyboardDeviceInput()
             {
                 DeviceHandle = (IntPtr)1,
                 VKey = (int)User32.VirtualKey.VK_NEXT,
@@ -155,7 +156,7 @@ namespace UnitTests
 
             Thread.Sleep(100);
 
-            Router.OnInput(device, new KeyboardDeviceInput()
+            Router.OnInput(device, new Win32KeyboardDeviceInput()
             {
                 DeviceHandle = (IntPtr)1,
                 VKey = (int)User32.VirtualKey.VK_NEXT,
@@ -168,7 +169,7 @@ namespace UnitTests
 
             expectedSlideIndex = expectedSlideIndex - 1;
 
-            Router.OnInput(device, new KeyboardDeviceInput()
+            Router.OnInput(device, new Win32KeyboardDeviceInput()
             {
                 DeviceHandle = (IntPtr)1,
                 VKey = (int)User32.VirtualKey.VK_PRIOR,
@@ -177,7 +178,7 @@ namespace UnitTests
 
             Thread.Sleep(100);
 
-            Router.OnInput(device, new KeyboardDeviceInput()
+            Router.OnInput(device, new Win32KeyboardDeviceInput()
             {
                 DeviceHandle = (IntPtr)1,
                 VKey = (int)User32.VirtualKey.VK_PRIOR,

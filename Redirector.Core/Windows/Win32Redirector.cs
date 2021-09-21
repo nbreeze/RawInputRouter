@@ -26,11 +26,15 @@ namespace Redirector.Core.Windows
         /// device the input can from.
         /// </para>
         /// </summary>
-        protected List<DeviceInput> InputBuffer = new();
+        protected List<Win32DeviceInput> InputBuffer = new();
 
         public override void OnInput(IDeviceSource source, DeviceInput input)
         {
-            InputBuffer.Add(input);
+            if (input is Win32DeviceInput _input)
+            {
+                InputBuffer.Add(_input);
+            }
+
             base.OnInput(source, input);
         }
 
@@ -38,7 +42,7 @@ namespace Redirector.Core.Windows
         {
             List<DeviceInput> removeInputs = new List<DeviceInput>();
 
-            foreach (DeviceInput input in InputBuffer)
+            foreach (Win32DeviceInput input in InputBuffer)
             {
                 if (Environment.TickCount - input.Time > 5000)
                 {
@@ -53,9 +57,9 @@ namespace Redirector.Core.Windows
             InputBuffer.RemoveAll(input => removeInputs.Contains(input));
         }
 
-        protected virtual DeviceInput MatchDeviceInputInBuffer(DeviceInput bufferInput)
+        protected virtual Win32DeviceInput MatchDeviceInputInBuffer(Win32DeviceInput bufferInput)
         {
-            DeviceInput matchedInput = InputBuffer.SkipWhile(input => !input.Matches(bufferInput))
+            Win32DeviceInput matchedInput = InputBuffer.SkipWhile(input => !input.Matches(bufferInput))
                 .FirstOrDefault();
 
             return matchedInput;
@@ -70,8 +74,11 @@ namespace Redirector.Core.Windows
             switch (cbt.Code)
             {
                 case 3: // HCBT_CREATEWND
-                    foreach (var app in Applications)
+                    foreach (IApplicationReceiver _app in Applications)
                     {
+                        if (_app is not IWin32ApplicationReceiver app)
+                            continue;
+
                         if (User32.IsWindow(app.Handle))
                             continue;
 
@@ -81,21 +88,26 @@ namespace Redirector.Core.Windows
                     break;
 
                 case 4: // HCBT_DESTROYWND
-                    apps = Applications.Where(app => app.Handle == wParam);
-                    foreach (var app in apps)
+                    apps = Applications.Where(_app => _app is IWin32ApplicationReceiver app && app.Handle == wParam);
+                    foreach (IApplicationReceiver _app in apps)
                     {
-                        if (app != null)
-                        {
-                            app.Handle = IntPtr.Zero;
-                            app.ProcessId = 0;
-                        }
+                        if (_app is not IWin32ApplicationReceiver app)
+                            continue;
+
+                        app.Handle = IntPtr.Zero;
+                        app.ProcessId = 0;
                     }
 
                     break;
             }
         }
 
-        public virtual bool ProcessRawInputMessage(IntPtr wParam, IntPtr lParam)
+        /// <summary>
+        /// Process a WM_INPUT message.
+        /// </summary>
+        /// <param name="wParam"></param>
+        /// <param name="lParam"></param>
+        public virtual void ProcessRawInputMessage(IntPtr wParam, IntPtr lParam)
         {
             int tickCount = Environment.TickCount;
             RawInput.RAWINPUT info = new();
@@ -118,7 +130,7 @@ namespace Redirector.Core.Windows
                     switch (virtualKey)
                     {
                         case (User32.VirtualKey)255:
-                            return false; // Discard "fake keys"
+                            return; // Discard "fake keys"
                         case User32.VirtualKey.VK_SHIFT:
                             // Correct left-hand / right-hand SHIFT
                             virtualKey = (User32.VirtualKey)User32.MapVirtualKey(scanCode, (User32.MapVirtualKeyTranslation)virtualKey);
@@ -139,7 +151,7 @@ namespace Redirector.Core.Windows
                             scanCode = User32.MapVirtualKey((int)virtualKey, User32.MapVirtualKeyTranslation.MAPVK_VK_TO_VSC);
                     }
 
-                    input = new KeyboardDeviceInput()
+                    input = new Win32KeyboardDeviceInput()
                     {
                         DeviceHandle = info.header.hDevice,
                         Time = tickCount,
@@ -153,14 +165,12 @@ namespace Redirector.Core.Windows
 
             if (input != null)
             {
-                IDeviceSource source = Devices.Where(d => d.Handle == input.DeviceHandle).FirstOrDefault();
+                IDeviceSource source = Devices.Where(_d => _d is IWin32DeviceSource d && d.Handle == input.DeviceHandle).FirstOrDefault();
                 if (source != null)
                 {
                     OnInput(source, input);
                 }
             }
-
-            return false;
         }
 
         public virtual bool ProcessKeyboardInterceptMessage(IntPtr wParam, IntPtr lParam)
@@ -174,7 +184,7 @@ namespace Redirector.Core.Windows
             int virtualKey = Environment.Is64BitProcess ? (int)(ulong)wParam : (int)wParam;
             uint flags = Environment.Is64BitProcess ? (uint)(ulong)lParam : (uint)lParam;
 
-            KeyboardDeviceInput input = new()
+            Win32KeyboardDeviceInput input = new()
             {
                 Time = tickCount,
                 VKey = virtualKey,
@@ -185,13 +195,13 @@ namespace Redirector.Core.Windows
 
             CleanInputBuffer();
 
-            DeviceInput matchedInput = MatchDeviceInputInBuffer(input);
+            Win32DeviceInput matchedInput = MatchDeviceInputInBuffer(input);
             if (matchedInput != null)
             {
                 InputBuffer.Remove(matchedInput);
 
                 // Find device source that made the input. This should not be null.
-                IDeviceSource source = Devices.Where(d => d.Handle == matchedInput.DeviceHandle)
+                IDeviceSource source = Devices.Where(_d => _d is IWin32DeviceSource d && d.Handle == matchedInput.DeviceHandle)
                     .First();
 
                 return ShouldBlockOriginalInput(source, matchedInput);
@@ -202,12 +212,12 @@ namespace Redirector.Core.Windows
                 if (input.IsKeyDown)
                 {
                     // Try to see if a device is currently holding the key.
-                    IDeviceSource source = Devices.Where(d => d.State.GetVirtualKeyState(input))
+                    IDeviceSource source = Devices.Where(_d => _d is IWin32DeviceSource d && d.VirtualKeyStates.GetVirtualKeyState(input))
                         .FirstOrDefault();
 
                     if (source != null)
                     {
-                        input.DeviceHandle = source.Handle;
+                        input.DeviceHandle = (source as IWin32DeviceSource).Handle;
                         return ShouldBlockOriginalInput(source, input);
                     }
                 }
@@ -219,13 +229,13 @@ namespace Redirector.Core.Windows
         public virtual void ProcessRawInputDeviceChangedMessage(IntPtr wParam, IntPtr lParam)
         {
             int msgType = wParam.ToInt32();
-            IDeviceSource device;
+            IWin32DeviceSource device;
 
             switch (msgType)
             {
                 case 1: // GIDC_ARRIVAL
                     string deviceName = RawInput.GetRawInputDeviceInterfaceName(lParam);
-                    device = Devices.Where(d => d.Path.Equals(deviceName)).FirstOrDefault();
+                    device = Devices.Where(_d => _d is IWin32DeviceSource d && d.Path.Equals(deviceName)).FirstOrDefault() as IWin32DeviceSource;
                     if (device != null)
                     {
                         device.Handle = lParam;
@@ -234,7 +244,7 @@ namespace Redirector.Core.Windows
 
                     break;
                 case 2: // GIDC_REMOVAL
-                    device = Devices.Where(d => d.Handle == lParam).FirstOrDefault();
+                    device = Devices.Where(_d => _d is IWin32DeviceSource d && d.Handle == lParam).FirstOrDefault() as IWin32DeviceSource;
                     if (device != null)
                     {
                         device.OnDisconnect();
@@ -246,8 +256,11 @@ namespace Redirector.Core.Windows
 
         public virtual void OnWindowTextChanged(IntPtr hWnd)
         {
-            foreach (var app in Applications)
+            foreach (IApplicationReceiver _app in Applications)
             {
+                if (_app is not IWin32ApplicationReceiver app)
+                    continue;
+
                 if (User32.IsWindow(app.Handle))
                     continue;
 

@@ -22,9 +22,9 @@ namespace Redirector.WinUI.UI
 {
     public sealed partial class NewRouteDialog : ContentDialog
     {
-        private ObservableCollection<IDeviceSource> Devices => App.Current.Redirector.Devices;
+        public static ObservableCollection<IDeviceSource> Devices => App.Current.Redirector.Devices;
 
-        private ObservableCollection<IApplicationReceiver> Applications => App.Current.Redirector.Applications;
+        public static ObservableCollection<IApplicationReceiver> Applications => App.Current.Redirector.Applications;
 
         public WinUIRoute Source { get; set; }
 

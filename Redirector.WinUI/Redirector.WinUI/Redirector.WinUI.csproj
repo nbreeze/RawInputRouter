@@ -10,7 +10,7 @@
     <UseWinUI>true</UseWinUI>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <NoWarn>1701;1702;1416</NoWarn>
+    <NoWarn>1701;1702</NoWarn>
     <OutputPath></OutputPath>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
@@ -77,6 +77,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Triggers\" />
     <Folder Include="Themes\" />
     <Folder Include="UI\Routes\" />
   </ItemGroup>

@@ -115,10 +115,7 @@ namespace Redirector.WinUI
         private Window m_window;
 
         [DllImport("user32.dll")]
-        static extern IntPtr CallWindowProc(IntPtr lpPrevWndFunc, IntPtr hWnd, User32.WindowMessage msg, IntPtr wParam, IntPtr lParam);
-
-        const int OBJID_WINDOW = 0;
-        const int CHILDID_SELF = 0;
+        private static extern IntPtr CallWindowProc(IntPtr lpPrevWndFunc, IntPtr hWnd, User32.WindowMessage msg, IntPtr wParam, IntPtr lParam);
 
         private static unsafe IntPtr WndProc(IntPtr hWnd, User32.WindowMessage msg, void* _wParam, void* _lParam)
         {
@@ -172,7 +169,10 @@ namespace Redirector.WinUI
 
             return User32.DefWindowProc(hWnd, msg, wParam, lParam);
         }
-    
+
+        private const int OBJID_WINDOW = 0;
+        private const int CHILDID_SELF = 0;
+
         private static void WndEventProc(IntPtr hHook, User32.WindowsEventHookType eventType, IntPtr hWnd, int idObject, int idChild, int dwEventThread, uint dwmsEventTime)
         {
             switch (eventType)

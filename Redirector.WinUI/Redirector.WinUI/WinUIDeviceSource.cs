@@ -1,4 +1,5 @@
 ﻿using Redirector.Core;
+using Redirector.Core.Windows;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Redirector.WinUI
 {
-    public class WinUIDeviceSource : DeviceSource
+    public class WinUIDeviceSource : Win32DeviceSource
     {
         public WinUIDeviceSource() : base()
         {

@@ -16,7 +16,7 @@
 
     <ScrollViewer Width="480">
         <StackPanel>
-            <ComboBox Header="Input:" ItemsSource="{x:Bind Devices}" SelectedItem="{x:Bind Source.Source, Mode=TwoWay}" HorizontalAlignment="Stretch">
+            <ComboBox Header="Input:" ItemsSource="{x:Bind local:NewRouteDialog.Devices}" SelectedItem="{x:Bind Source.Source, Mode=TwoWay}" HorizontalAlignment="Stretch">
                 <ComboBox.ItemTemplate>
                     <DataTemplate x:DataType="root:WinUIDeviceSource">
                         <TextBlock Text="{x:Bind DisplayDeviceName(Handle, Name), Mode=OneWay}"/>
@@ -24,7 +24,7 @@
                 </ComboBox.ItemTemplate>
             </ComboBox>
 
-            <ComboBox Header="Output to:" ItemsSource="{x:Bind Applications}" SelectedItem="{x:Bind Source.Destination, Mode=TwoWay}" HorizontalAlignment="Stretch">
+            <ComboBox Header="Output to:" ItemsSource="{x:Bind local:NewRouteDialog.Applications}" SelectedItem="{x:Bind Source.Destination, Mode=TwoWay}" HorizontalAlignment="Stretch">
                 <ComboBox.ItemTemplate>
                     <DataTemplate x:DataType="root:WinUIApplicationReceiver">
                         <TextBlock Text="{x:Bind Name, Mode=OneWay}"/>

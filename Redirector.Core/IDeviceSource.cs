@@ -8,19 +8,13 @@ namespace Redirector.Core
 {
     public interface IDeviceSource : INotifyPropertyChanged
     {
-        public DeviceSourceState State { get; }
-
         public string Name { get; set; }
 
         public string Path { get; set; }
 
-        public IntPtr Handle { get; set; }
-
         public bool BlockOriginalInput { get; set; }
 
         public bool ShouldBlockOriginalInput(DeviceInput input);
-
-        public IntPtr FindHandle();
 
         public void OnInput(DeviceInput input);
 

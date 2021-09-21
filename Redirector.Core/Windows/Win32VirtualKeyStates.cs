@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 
-namespace Redirector.Core
+namespace Redirector.Core.Windows
 {
-    public sealed class DeviceSourceState
+    public sealed class Win32VirtualKeyStates : IWin32VirtualKeyStates
     {
         private Dictionary<int, bool> VirtualKeyStates = new Dictionary<int, bool>();
 
-        private int GetVirtualKeyHash(KeyboardDeviceInput input)
+        private int GetVirtualKeyHash(Win32KeyboardDeviceInput input)
         {
             return input.VKey | input.ScanCode << 8 | (input.Extended ? 1 << 16 : 0);
         }
@@ -16,13 +16,13 @@ namespace Redirector.Core
             VirtualKeyStates.Clear();
         }
 
-        public bool GetVirtualKeyState(KeyboardDeviceInput input)
+        public bool GetVirtualKeyState(Win32KeyboardDeviceInput input)
         {
             VirtualKeyStates.TryGetValue(GetVirtualKeyHash(input), out bool keyDown);
             return keyDown;
         }
 
-        public void SetVirtualKeyState(KeyboardDeviceInput input, bool state)
+        public void SetVirtualKeyState(Win32KeyboardDeviceInput input, bool state)
         {
             VirtualKeyStates[GetVirtualKeyHash(input)] = state;
         }

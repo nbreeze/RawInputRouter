@@ -8,7 +8,7 @@ namespace Redirector.Core
         public virtual bool ShouldTrigger(IRoute route, IDeviceSource source, DeviceInput input)
         {
             IDeviceSource routeSource = route.Source;
-            return routeSource != null && routeSource.Handle != IntPtr.Zero && routeSource == source;
+            return routeSource != null && routeSource == source;
         }
     }
 }

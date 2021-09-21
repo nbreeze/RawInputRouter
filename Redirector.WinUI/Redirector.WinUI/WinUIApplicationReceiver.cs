@@ -1,6 +1,7 @@
 ﻿using Microsoft.UI.Xaml;
 using PInvoke;
 using Redirector.Core;
+using Redirector.Core.Windows;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +17,7 @@ namespace Redirector.WinUI
         Contains
     }
 
-    public class WinUIApplicationReceiver : ApplicationReceiver
+    public class WinUIApplicationReceiver : Win32ApplicationReceiver
     {
         private string _WindowTextSearchQuery = "";
         public string WindowTextSearchQuery { get => _WindowTextSearchQuery; set => SetProperty(ref _WindowTextSearchQuery, value); }
