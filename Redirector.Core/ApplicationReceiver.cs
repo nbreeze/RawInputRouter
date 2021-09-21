@@ -54,7 +54,7 @@ namespace Redirector.Core
                 List<IntPtr> windows = new List<IntPtr>();
                 User32.EnumWindows((hWnd, lParam) =>
                 {
-                    if (User32.IsWindow(hWnd) && User32.IsWindowVisible(hWnd))
+                    if (User32.IsWindow(hWnd))
                     {
                         User32.GetWindowThreadProcessId(hWnd, out int processId);
                         if (processIds.Contains(processId) && IsMatchingWindow(hWnd))

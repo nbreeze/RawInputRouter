@@ -18,7 +18,7 @@
                         HorizontalAlignment="Stretch">
         <NavigationView.MenuItemTemplate>
             <DataTemplate x:DataType="local:NavigationItem">
-                <NavigationViewItem Content="{x:Bind Title}" Icon="{x:Bind Icon}"/>
+                <NavigationViewItem Content="{x:Bind Caption}" Icon="{x:Bind Icon}"/>
             </DataTemplate>
         </NavigationView.MenuItemTemplate>
         <NavigationView.HeaderTemplate>

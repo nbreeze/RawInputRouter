@@ -37,6 +37,7 @@
                 <Button Grid.Column="0" HorizontalAlignment="Center" Width="76" IsEnabled="{x:Bind DisableIfCapturing(root:App.Current.ViewModel.IsCapturingDevice), Mode=OneWay}"
                         Click="OnClickCaptureButton">Capture</Button>
             </Grid>
+            <CheckBox IsChecked="{x:Bind Source.BlockOriginalInput, Mode=TwoWay}">Block original input</CheckBox>
         </StackPanel>
     </ScrollViewer>
 </ContentDialog>

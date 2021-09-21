@@ -60,10 +60,7 @@ namespace Redirector.WinUI.UI.Home
             {
                 dialog.Title = "Edit device source";
 
-                source.Name = dest.Name;
-                source.Path = dest.Path;
-                source.Handle = dest.Handle;
-                source.BlockOriginalInput = dest.BlockOriginalInput;
+                source.Copy(dest);
             }
             else
             {
@@ -76,21 +73,13 @@ namespace Redirector.WinUI.UI.Home
             {
                 if (dest != null)
                 {
-                    dest.Name = source.Name;
-                    dest.Path = source.Path;
-                    dest.Handle = source.Handle;
-                    dest.BlockOriginalInput = source.BlockOriginalInput;
+                    dest.Copy(source);
                 }
                 else
                 {
-                    Sources.Add(dialog.Source);
+                    Sources.Add(source);
                 }
             }
-        }
-
-        private async void OnClickNewDeviceHyperlink(Microsoft.UI.Xaml.Documents.Hyperlink sender, Microsoft.UI.Xaml.Documents.HyperlinkClickEventArgs args)
-        {
-            await ShowDeviceSettingsDialog();
         }
 
         private async void OnClickAddDeviceButton(object sender, RoutedEventArgs e)

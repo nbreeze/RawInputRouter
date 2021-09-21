@@ -23,8 +23,9 @@ namespace Redirector.WinUI.UI
 {
     public class NavigationItem
     {
-        public string Title { get; set; } = "";
+        public string Caption { get; set; } = "";
         public IconElement Icon { get; set; } = null;
+        public Type PageType { get; set; } = null;
     }
 
     /// <summary>
@@ -34,9 +35,9 @@ namespace Redirector.WinUI.UI
     {
         public ICollection<NavigationItem> NavigationItems { get; } = new Collection<NavigationItem>()
         {
-            new() { Title = "Devices", Icon = new SymbolIcon(Symbol.Keyboard) },
-            new() { Title = "Applications", Icon = new SymbolIcon(Symbol.Caption) },
-            new() { Title = "Routing", Icon = new SymbolIcon(Symbol.Remote) },
+            new() { Caption = "Devices", Icon = new SymbolIcon(Symbol.Keyboard), PageType = typeof(HomePage) },
+            new() { Caption = "Applications", Icon = new SymbolIcon(Symbol.Caption), PageType = typeof(ApplicationsPage) },
+            new() { Caption = "Routes", Icon = new SymbolIcon(Symbol.Remote), PageType = typeof(RoutesPage) },
         };
 
         public TopLevelPage()
@@ -44,6 +45,24 @@ namespace Redirector.WinUI.UI
             this.InitializeComponent();
 
             Navigation.SelectedItem = NavigationItems.First();
+
+            ContentFrame.Navigated += OnNavigated;
+        }
+
+        private void OnNavigated(object sender, NavigationEventArgs e)
+        {
+            // Sync the selected navigation item.
+            NavigationItem item = NavigationItems.Where(i => i.PageType == e.SourcePageType)
+                .FirstOrDefault();
+
+            if (item != null)
+            {
+                Navigation.SelectedItem = item;
+            }
+            else if (e.SourcePageType == typeof(SettingsPage))
+            {
+                Navigation.SelectedItem = Navigation.SettingsItem;
+            }
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -65,17 +84,19 @@ namespace Redirector.WinUI.UI
         {
             if (args.SelectedItem == null)
                 return;
-            if (args.SelectedItem is not NavigationItem item)
-                return;
-
-            switch (item.Title)
+            if (args.SelectedItem is NavigationItem item)
             {
-                case "Devices":
-                    ContentFrame.Navigate(typeof(HomePage));
-                    break;
-                case "Applications":
-                    ContentFrame.Navigate(typeof(ApplicationsPage));
-                    break;
+                if (ContentFrame.SourcePageType == item.PageType)
+                    return;
+
+                ContentFrame.Navigate(item.PageType);
+            }
+            else if (args.SelectedItem == Navigation.SettingsItem)
+            {
+                if (ContentFrame.SourcePageType == typeof(SettingsPage))
+                    return;
+
+                ContentFrame.Navigate(typeof(SettingsPage));
             }
         }
 

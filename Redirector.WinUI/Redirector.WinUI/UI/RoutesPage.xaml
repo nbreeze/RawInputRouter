@@ -1,0 +1,119 @@
+﻿<Page
+    x:Class="Redirector.WinUI.UI.RoutesPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Redirector.WinUI.UI"
+    xmlns:root="using:Redirector.WinUI"
+    xmlns:toolkit="using:CommunityToolkit.WinUI.UI.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Page.Resources>
+        <CollectionViewSource x:Name="RoutesCVS"/>
+        <local:RouteTriggerDataTemplateSelector x:Key="RouteTriggerDataTemplateSelector">
+        </local:RouteTriggerDataTemplateSelector>
+        <local:RouteActionDataTemplateSelector x:Key="RouteActionDataTemplateSelector">
+        </local:RouteActionDataTemplateSelector>
+    </Page.Resources>
+    
+    <ScrollViewer HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <StackPanel>
+            <Button Click="OnClickAddRouteButton" Style="{StaticResource AddButtonStyle}" HorizontalAlignment="Stretch">
+                Add route
+            </Button>
+
+            <ItemsRepeater ItemsSource="{x:Bind RoutesCVS.View, Mode=OneWay}" Margin="0,16,0,0">
+                <ItemsRepeater.ItemTemplate>
+                    <DataTemplate x:DataType="local:RouteGroup">
+                        <StackPanel>
+                            <Border Margin="12,0,0,8"
+                                    Padding="0,0,0,8"
+                                    BorderBrush="{ThemeResource ButtonDisabledBorderThemeBrush}"
+                                    BorderThickness="0,0,0,1">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{x:Bind Source.Name, Mode=OneWay}" 
+                                               Style="{ThemeResource SubheaderTextBlockStyle}"/>
+                                    <Button Click="OnClickEditDeviceButton" Tag="{x:Bind Source}" Width="48" Height="48" Background="Transparent">
+                                        <SymbolIcon Symbol="Edit"/>
+                                    </Button>
+                                </StackPanel>
+                            </Border>
+
+                            <ItemsRepeater ItemsSource="{x:Bind}" Margin="4,0,0,8">
+                                <ItemsRepeater.ItemTemplate>
+                                    <DataTemplate x:DataType="root:WinUIRoute">
+                                        <Border>
+                                            <Grid ColumnSpacing="12">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition/>
+                                                    <RowDefinition/>
+                                                </Grid.RowDefinitions>
+
+                                                <SymbolIcon Width="40" Height="40" Symbol="Remote"
+                                                            Grid.Column="0"/>
+
+                                                <StackPanel Grid.Column="1">
+                                                    <Button Tag="{x:Bind}"
+                                                            Click="OnClickAddRouteTrigger"
+                                                            Style="{StaticResource AddButtonStyle}" 
+                                                            HorizontalAlignment="Stretch">
+                                                        Add trigger
+                                                    </Button>
+                                                </StackPanel>
+
+                                                <StackPanel Grid.Column="2">
+                                                    <Button Tag="{x:Bind}"
+                                                            Click="OnClickAddRouteAction"
+                                                            Style="{StaticResource AddButtonStyle}" 
+                                                            HorizontalAlignment="Stretch">
+                                                        Add output action
+                                                    </Button>
+                                                </StackPanel>
+
+                                                <ComboBox Header="Output to:" 
+                                                          ItemsSource="{x:Bind local:RoutesPage.Applications}"
+                                                          SelectedItem="{x:Bind Destination, Mode=TwoWay}"
+                                                          Grid.Column="3"
+                                                          HorizontalAlignment="Stretch">
+                                                    <ComboBox.ItemTemplate>
+                                                        <DataTemplate x:DataType="root:WinUIApplicationReceiver">
+                                                            <TextBlock Text="{x:Bind Name, Mode=OneWay}"/>
+                                                        </DataTemplate>
+                                                    </ComboBox.ItemTemplate>
+                                                </ComboBox>
+
+                                                <ListView ItemsSource="{x:Bind Triggers}"
+                                                          Grid.Row="1"
+                                                          Grid.Column="0"
+                                                          Grid.ColumnSpan="2"
+                                                          ItemTemplateSelector="{StaticResource RouteTriggerDataTemplateSelector}">
+                                                </ListView>
+
+                                                <ListView ItemsSource="{x:Bind Actions}"
+                                                          Grid.Row="1"
+                                                          Grid.Column="2"
+                                                          Grid.ColumnSpan="2"
+                                                          ItemTemplateSelector="{StaticResource RouteActionDataTemplateSelector}">
+                                                </ListView>
+                                                
+                                            </Grid>
+                                        </Border>
+
+                                    </DataTemplate>
+                                </ItemsRepeater.ItemTemplate>
+                            </ItemsRepeater>
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsRepeater.ItemTemplate>
+            </ItemsRepeater>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

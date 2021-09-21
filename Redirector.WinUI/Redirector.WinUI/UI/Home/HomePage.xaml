@@ -13,18 +13,8 @@
     <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
         <ScrollViewer HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <StackPanel>
-                <Button Click="OnClickAddDeviceButton" Background="Transparent"
-                        HorizontalAlignment="Stretch"
-                        HorizontalContentAlignment="Left"
-                        CornerRadius="0"
-                        Padding="12,12">
-                    <StackPanel Orientation="Horizontal">
-                        <Border BorderBrush="{ThemeResource ButtonForegroundThemeBrush}" BorderThickness="2" Width="40" Height="40">
-                            <SymbolIcon Symbol="Add"/>
-                        </Border>
-
-                        <TextBlock Margin="12,0,0,0">Add device source</TextBlock>
-                    </StackPanel>
+                <Button Click="OnClickAddDeviceButton" Style="{StaticResource AddButtonStyle}" HorizontalAlignment="Stretch">
+                    Add device source
                 </Button>
 
                 <ListView ItemsSource="{x:Bind Sources, Mode=OneWay}">
@@ -38,8 +28,8 @@
                                     </Grid.ColumnDefinitions>
                                     <StackPanel Grid.Column="1">
                                         <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind Name, Mode=OneWay}"/>
-                                        <TextBlock Text="{x:Bind Path, Mode=OneWay}" TextWrapping="NoWrap"/>
-                                        <TextBlock Text="{x:Bind sys:String.Format('{0:x}',Handle), Mode=OneWay}"/>
+                                        <TextBlock Text="{x:Bind Path, Mode=OneWay}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Text="{x:Bind sys:String.Format('0x{0:X}',Handle), Mode=OneWay}"/>
                                     </StackPanel>
                                     <SymbolIcon Grid.Column="0" Width="40" Height="40" Symbol="Keyboard"/>
                                 </Grid>

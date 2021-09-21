@@ -82,8 +82,6 @@ namespace Redirector.WinUI.UI
                 else
                 {
                     Applications.Add(source);
-
-                    source.FindWindow();
                 }
             }
         }

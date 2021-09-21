@@ -35,6 +35,9 @@
     <None Remove="UI\ApplicationsPage.xaml" />
     <None Remove="UI\DeviceSettingsDialog.xaml" />
     <None Remove="UI\Home\HomePage.xaml" />
+    <None Remove="UI\NewRouteDialog.xaml" />
+    <None Remove="UI\RoutesPage.xaml" />
+    <None Remove="UI\SettingsPage.xaml" />
     <None Remove="UI\TopLevelPage.xaml" />
   </ItemGroup>
   <ItemGroup>
@@ -75,6 +78,25 @@
 
   <ItemGroup>
     <Folder Include="Themes\" />
+    <Folder Include="UI\Routes\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="UI\NewRouteDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="UI\SettingsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="UI\RoutesPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
 
   <ItemGroup>

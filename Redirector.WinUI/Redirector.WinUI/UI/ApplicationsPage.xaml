@@ -13,18 +13,8 @@
     <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
         <ScrollViewer HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <StackPanel>
-                <Button Click="OnClickAddApplicationButton" Background="Transparent"
-                        HorizontalAlignment="Stretch"
-                        HorizontalContentAlignment="Left"
-                        CornerRadius="0"
-                        Padding="12,12">
-                    <StackPanel Orientation="Horizontal">
-                        <Border BorderBrush="{ThemeResource ButtonForegroundThemeBrush}" BorderThickness="2" Width="40" Height="40">
-                            <SymbolIcon Symbol="Add"/>
-                        </Border>
-
-                        <TextBlock Margin="12,0,0,0">Add application</TextBlock>
-                    </StackPanel>
+                <Button Click="OnClickAddApplicationButton" Style="{StaticResource AddButtonStyle}" HorizontalAlignment="Stretch">
+                    Add application
                 </Button>
 
                 <ListView ItemsSource="{x:Bind Applications, Mode=OneWay}">
@@ -38,7 +28,7 @@
                                     </Grid.ColumnDefinitions>
                                     <StackPanel Grid.Column="1">
                                         <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind Name, Mode=OneWay}"/>
-                                        <TextBlock Text="{x:Bind WindowText, Mode=OneWay}" TextWrapping="NoWrap"/>
+                                        <TextBlock Text="{x:Bind WindowText, Mode=OneWay}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"/>
                                         <TextBlock Text="{x:Bind DisplayHandle(Handle), Mode=OneWay}"/>
                                     </StackPanel>
                                     <SymbolIcon Grid.Column="0" Width="40" Height="40" Symbol="Caption"/>
