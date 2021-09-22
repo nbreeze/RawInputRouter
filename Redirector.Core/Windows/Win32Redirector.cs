@@ -113,7 +113,7 @@ namespace Redirector.Core.Windows
             RawInput.RAWINPUT info = new();
             RawInput.GetRawInputData(lParam, ref info);
 
-            DeviceInput input = null;
+            Win32DeviceInput input = null;
 
             switch (info.header.dwType)
             {

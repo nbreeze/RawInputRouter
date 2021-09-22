@@ -1,9 +1,9 @@
 ﻿using System;
 using PInvoke;
 
-namespace Redirector.Core.Windows
+namespace Redirector.Core.Windows.Actions
 {
-    public class Win32AcceleratorOutputAction : OutputAction
+    public class AcceleratorOutputAction : OutputAction
     {
         private int _Accelerator = 0;
 

@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Redirector.Core.Windows
+namespace Redirector.Core.Windows.Actions
 {
-    public class Win32KeyboardOutputAction : OutputAction
+    public class KeyboardOutputAction : OutputAction
     {
         private int _VKey = 0;
         public int VKey { get => _VKey; set => SetProperty(ref _VKey, value); }

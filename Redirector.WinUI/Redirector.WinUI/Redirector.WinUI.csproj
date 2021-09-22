@@ -36,13 +36,14 @@
     <None Remove="UI\DeviceSettingsDialog.xaml" />
     <None Remove="UI\Home\HomePage.xaml" />
     <None Remove="UI\NewRouteDialog.xaml" />
+    <None Remove="UI\NewRouteTriggerDialog.xaml" />
     <None Remove="UI\RoutesPage.xaml" />
     <None Remove="UI\SettingsPage.xaml" />
     <None Remove="UI\TopLevelPage.xaml" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="7.0.3" />
-    <PackageReference Include="CommunityToolkit.WinUI.UI.Controls.Core" Version="7.0.3" />
+    <PackageReference Include="CommunityToolkit.WinUI.UI.Controls" Version="7.0.3" />
     <PackageReference Include="Microsoft.ProjectReunion" Version="0.8.3" />
     <PackageReference Include="Microsoft.ProjectReunion.Foundation" Version="0.8.3" />
     <PackageReference Include="Microsoft.ProjectReunion.WinUI" Version="0.8.3" />
@@ -77,9 +78,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Triggers\" />
     <Folder Include="Themes\" />
     <Folder Include="UI\Routes\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="UI\NewRouteTriggerDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
 
   <ItemGroup>

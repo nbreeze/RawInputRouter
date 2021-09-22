@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System;
 using System.Collections.ObjectModel;
 
 namespace Redirector.Core
@@ -17,11 +18,15 @@ namespace Redirector.Core
             Applications.CollectionChanged += OnWindowsCollectionChanged;
         }
 
+        public event EventHandler<RedirectorInputEventArgs> Input;
+
         public virtual void OnInput(IDeviceSource source, DeviceInput input)
         {
             source.OnInput(input);
 
             DispatchInputToRoutes(source, input);
+
+            Input?.Invoke(this, new(source, input));
         }
 
         protected void DispatchInputToRoutes(IDeviceSource source, DeviceInput input)

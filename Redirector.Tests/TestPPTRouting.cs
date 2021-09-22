@@ -6,6 +6,7 @@ using System.Threading;
 using PInvoke;
 using System.Linq;
 using Redirector.Core.Windows;
+using Redirector.Core.Windows.Actions;
 
 namespace UnitTests
 {
@@ -118,7 +119,7 @@ namespace UnitTests
                 },
                 Actions =
                 {
-                    new Win32AcceleratorOutputAction()
+                    new AcceleratorOutputAction()
                     {
                         Accelerator = 393
                     }
@@ -138,7 +139,7 @@ namespace UnitTests
                 },
                 Actions =
                 {
-                    new Win32AcceleratorOutputAction()
+                    new AcceleratorOutputAction()
                     {
                         Accelerator = 394
                     }

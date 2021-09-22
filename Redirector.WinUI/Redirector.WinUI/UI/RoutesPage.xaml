@@ -5,6 +5,8 @@
     xmlns:local="using:Redirector.WinUI.UI"
     xmlns:root="using:Redirector.WinUI"
     xmlns:toolkit="using:CommunityToolkit.WinUI.UI.Controls"
+    xmlns:trig="using:Redirector.WinUI.Triggers"
+    xmlns:sys="using:System"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
@@ -12,7 +14,44 @@
 
     <Page.Resources>
         <CollectionViewSource x:Name="RoutesCVS"/>
+
+        <MenuFlyout x:Name="RouteTriggerContextMenuFlyout" x:Key="RouteTriggerContextMenuFlyout">
+            <MenuFlyoutItem Text="Edit" 
+                            Click="OnClickEditRouteTriggerMenuItem">
+                <MenuFlyoutItem.Icon>
+                    <SymbolIcon Symbol="Edit"/>
+                </MenuFlyoutItem.Icon>
+            </MenuFlyoutItem>
+            <MenuFlyoutItem Text="Delete" 
+                            Click="OnClickDeleteRouteTriggerMenuItem">
+                <MenuFlyoutItem.Icon>
+                    <SymbolIcon Symbol="Delete"/>
+                </MenuFlyoutItem.Icon>
+            </MenuFlyoutItem>
+        </MenuFlyout>
+
         <local:RouteTriggerDataTemplateSelector x:Key="RouteTriggerDataTemplateSelector">
+            <local:RouteTriggerDataTemplateSelector.KeyboardInputTemplate>
+                <DataTemplate x:DataType="trig:WinUIKeyboardInputRouteTrigger">
+                    <StackPanel Tag="{x:Bind}" 
+                                HorizontalAlignment="Stretch"
+                                ContextFlyout="{StaticResource RouteTriggerContextMenuFlyout}">
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <SymbolIcon Symbol="Keyboard"
+                                        Grid.Column="0"/>
+
+                            <TextBlock Text="{x:Bind GetDisplayString(VKey, KeyDown), Mode=OneWay}"
+                                       Grid.Column="1"/>
+                        </Grid>
+
+                    </StackPanel>
+                </DataTemplate>
+            </local:RouteTriggerDataTemplateSelector.KeyboardInputTemplate>
         </local:RouteTriggerDataTemplateSelector>
         <local:RouteActionDataTemplateSelector x:Key="RouteActionDataTemplateSelector">
         </local:RouteActionDataTemplateSelector>
@@ -44,7 +83,7 @@
                             <ItemsRepeater ItemsSource="{x:Bind}" Margin="4,0,0,8">
                                 <ItemsRepeater.ItemTemplate>
                                     <DataTemplate x:DataType="root:WinUIRoute">
-                                        <Border>
+                                        <Border Margin="0,12,0,16">
                                             <Grid ColumnSpacing="12">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="Auto"/>
@@ -58,24 +97,55 @@
                                                 </Grid.RowDefinitions>
 
                                                 <SymbolIcon Width="40" Height="40" Symbol="Remote"
+                                                            VerticalAlignment="Top"
                                                             Grid.Column="0"/>
 
-                                                <StackPanel Grid.Column="1">
-                                                    <Button Tag="{x:Bind}"
-                                                            Click="OnClickAddRouteTrigger"
-                                                            Style="{StaticResource AddButtonStyle}" 
-                                                            HorizontalAlignment="Stretch">
-                                                        Add trigger
-                                                    </Button>
+                                                <StackPanel Grid.Column="1"
+                                                            Grid.Row="0">
+
+                                                    <ListView ItemsSource="{x:Bind Triggers}"
+                                                              ItemTemplateSelector="{StaticResource RouteTriggerDataTemplateSelector}"
+                                                              HorizontalAlignment="Stretch"
+                                                              HorizontalContentAlignment="Stretch"
+                                                              Grid.Row="0"
+                                                              Grid.Column="1">
+
+                                                        <ListView.Header>
+                                                            <StackPanel Margin="12,0,0,0" Orientation="Horizontal">
+                                                                <TextBlock>Triggers:</TextBlock>
+                                                            </StackPanel>
+                                                        </ListView.Header>
+
+                                                    </ListView>
+
+                                                    <AppBarButton Icon="Add" LabelPosition="Collapsed"
+                                                                  Width="40" Height="40"
+                                                                  Click="OnClickAddRouteTrigger"
+                                                                  Tag="{x:Bind}"
+                                                    />
+
                                                 </StackPanel>
 
-                                                <StackPanel Grid.Column="2">
-                                                    <Button Tag="{x:Bind}"
-                                                            Click="OnClickAddRouteAction"
-                                                            Style="{StaticResource AddButtonStyle}" 
-                                                            HorizontalAlignment="Stretch">
-                                                        Add output action
-                                                    </Button>
+                                                <StackPanel Grid.Column="2"
+                                                            Grid.Row="0">
+
+                                                    <ListView ItemsSource="{x:Bind Actions}"
+                                                          ItemTemplateSelector="{StaticResource RouteActionDataTemplateSelector}"
+                                                              HorizontalAlignment="Stretch"
+                                                              HorizontalContentAlignment="Stretch"
+                                                          Grid.Row="0"
+                                                                Grid.Column="2">
+                                                        <ListView.Header>
+                                                            <TextBlock Margin="12,0,0,0">Actions:</TextBlock>
+                                                        </ListView.Header>
+                                                    </ListView>
+
+                                                    <AppBarButton Icon="Add" LabelPosition="Collapsed"
+                                                                  Width="40" Height="40"
+                                                                  Click="OnClickAddRouteAction"
+                                                                  Tag="{x:Bind}"
+                                                    />
+
                                                 </StackPanel>
 
                                                 <ComboBox Header="Output to:" 
@@ -89,21 +159,6 @@
                                                         </DataTemplate>
                                                     </ComboBox.ItemTemplate>
                                                 </ComboBox>
-
-                                                <ListView ItemsSource="{x:Bind Triggers}"
-                                                          Grid.Row="1"
-                                                          Grid.Column="0"
-                                                          Grid.ColumnSpan="2"
-                                                          ItemTemplateSelector="{StaticResource RouteTriggerDataTemplateSelector}">
-                                                </ListView>
-
-                                                <ListView ItemsSource="{x:Bind Actions}"
-                                                          Grid.Row="1"
-                                                          Grid.Column="2"
-                                                          Grid.ColumnSpan="2"
-                                                          ItemTemplateSelector="{StaticResource RouteActionDataTemplateSelector}">
-                                                </ListView>
-                                                
                                             </Grid>
                                         </Border>
 
