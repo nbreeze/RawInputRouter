@@ -9,6 +9,7 @@ using Microsoft.UI.Xaml.Navigation;
 using Redirector.Core;
 using Redirector.Core.Windows;
 using Redirector.Core.Windows.Triggers;
+using Redirector.WinUI;
 using Redirector.WinUI.Triggers;
 using System;
 using System.Collections.Generic;
@@ -42,29 +43,16 @@ namespace Redirector.WinUI.UI
         }
     }
 
-    public sealed partial class NewRouteTriggerDialog : ContentDialog
+    internal class RouteTriggerTypeOption
+    {
+        public string Name { get; set; }
+
+        public Type Type { get; set; }
+    }
+
+    public sealed partial class NewRouteTriggerDialog : ObjectContentDialog
     {
         public static NewRouteTriggerDialog Current { get; private set; }
-
-        public static readonly DependencyProperty SelectedItemProperty = DependencyProperty.Register(
-            nameof(SelectedItem), 
-            typeof(string), 
-            typeof(NewRouteTriggerDialog), 
-            new("")
-        );
-
-        public string SelectedItem { get => GetValue(SelectedItemProperty) as string; set => SetValue(SelectedItemProperty, value); }
-
-        public static readonly DependencyProperty SourceProperty = DependencyProperty.Register(
-            nameof(Source),
-            typeof(IWinUIRouteTrigger),
-            typeof(NewRouteTriggerDialog),
-            new(null)
-        );
-
-        public IWinUIRouteTrigger Source { get => GetValue(SourceProperty) as IWinUIRouteTrigger; set => SetValue(SourceProperty, value); }
-
-        public IWinUIRouteTrigger Destination { get; set; }
 
         public static readonly DependencyProperty IsCapturingKeyboardInputProperty = DependencyProperty.Register(
             nameof(IsCapturingKeyboardInput),
@@ -75,9 +63,9 @@ namespace Redirector.WinUI.UI
 
         public bool IsCapturingKeyboardInput { get => (bool)GetValue(IsCapturingKeyboardInputProperty); set => SetValue(IsCapturingKeyboardInputProperty, value); }
 
-        public static Dictionary<string, Type> RouteTriggerTypesDictionary = new Dictionary<string, Type>()
+        private IList<RouteTriggerTypeOption> Options { get; } = new List<RouteTriggerTypeOption>()
         {
-            { "Keyboard Input", typeof(WinUIKeyboardInputRouteTrigger) }
+            new() { Name = "Keyboard input", Type = typeof(WinUIKeyboardInputRouteTrigger) }
         };
 
         public NewRouteTriggerDialog()
@@ -89,15 +77,19 @@ namespace Redirector.WinUI.UI
             Closed += OnClosed;
             App.Current.Redirector.Input += OnRedirectorInput;
 
+            RouteTriggerTypeOption option = null;
+
             if (Destination != null)
             {
-                SelectedItem = RouteTriggerTypesDictionary.First(pair => pair.Value == Destination.GetType())
-                    .Key;
+                option = Options.FirstOrDefault(option => option.Type == Destination.GetType());
             }
-            else
+
+            if (option == null)
             {
-                SelectedItem = RouteTriggerTypesDictionary.Keys.First();
+                option = Options.First();
             }
+
+            ComboBox.SelectedItem = option;
         }
 
         private void OnRedirectorInput(object sender, RedirectorInputEventArgs e)
@@ -128,19 +120,19 @@ namespace Redirector.WinUI.UI
 
         private void OnSelectedItemChanged(object sender, SelectionChangedEventArgs e)
         {
-            string routeTriggerTypeName = e.AddedItems.FirstOrDefault() as string;
-            if (string.IsNullOrEmpty(routeTriggerTypeName))
+            RouteTriggerTypeOption option = e.AddedItems.FirstOrDefault() as RouteTriggerTypeOption;
+            if (option == null || option.Type == null)
             {
                 Source = null;
                 return;
             }
 
-            IWinUIRouteTrigger newSource = Activator.CreateInstance(RouteTriggerTypesDictionary[routeTriggerTypeName]) as IWinUIRouteTrigger;
+            IWinUIRouteTrigger newSource = Activator.CreateInstance(option.Type) as IWinUIRouteTrigger;
             if (newSource != null)
             {
                 if (Destination != null && newSource.GetType() == Destination.GetType())
                 {
-                    newSource.Copy(Destination);
+                    newSource.Copy(Destination as IWinUIRouteTrigger);
                 }
             }
 

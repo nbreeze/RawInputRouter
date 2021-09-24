@@ -1,4 +1,4 @@
-﻿<ContentDialog
+﻿<local:ObjectContentDialog
     x:Class="Redirector.WinUI.UI.NewRouteTriggerDialog"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -35,13 +35,13 @@
     
     <StackPanel Width="480">
 
-        <ComboBox ItemsSource="{x:Bind local:NewRouteTriggerDialog.RouteTriggerTypesDictionary.Keys}"
-                  SelectedItem="{x:Bind SelectedItem, Mode=TwoWay}"
+        <ComboBox x:Name="ComboBox"
+                  ItemsSource="{x:Bind Options}"
                   SelectionChanged="OnSelectedItemChanged"
                   HorizontalAlignment="Stretch">
             <ComboBox.ItemTemplate>
-                <DataTemplate x:DataType="x:String">
-                    <TextBlock Text="{x:Bind}"/>
+                <DataTemplate x:DataType="local:RouteTriggerTypeOption">
+                    <TextBlock Text="{x:Bind Name}"/>
                 </DataTemplate>
             </ComboBox.ItemTemplate>
         </ComboBox>
@@ -52,4 +52,4 @@
                         ContentTemplateSelector="{StaticResource RouteTriggerDialogContentTemplateSelector}"/>
 
     </StackPanel>
-</ContentDialog>
+</local:ObjectContentDialog>

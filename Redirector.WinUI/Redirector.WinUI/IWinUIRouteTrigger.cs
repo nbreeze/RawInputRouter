@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Redirector.WinUI.Triggers
+namespace Redirector.WinUI
 {
     public interface IWinUIRouteTrigger : IRouteTrigger
     {

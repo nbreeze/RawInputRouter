@@ -7,6 +7,7 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using Redirector.Core;
+using Redirector.WinUI.Actions;
 using Redirector.WinUI.Triggers;
 using System;
 using System.Collections.Generic;
@@ -49,8 +50,15 @@ namespace Redirector.WinUI.UI
 
     public class RouteActionDataTemplateSelector : DataTemplateSelector
     {
+        public DataTemplate AcceleratorTemplate { get; set; }
+
         protected override DataTemplate SelectTemplateCore(object item, DependencyObject container)
         {
+            if (item is WinUIAcceleratorOutputAction)
+            {
+                return AcceleratorTemplate;
+            }
+
             return base.SelectTemplateCore(item, container);
         }
     }
@@ -188,27 +196,20 @@ namespace Redirector.WinUI.UI
             switch (result)
             {
                 case ContentDialogResult.Primary:
-                    route.Triggers.Add(dialog.Source);
+                    route.Triggers.Add((IWinUIRouteTrigger)dialog.Source);
                     break;
             }
         }
 
-        private void OnClickAddRouteAction(object sender, RoutedEventArgs e)
+        private async void OnClickAddRouteAction(object sender, RoutedEventArgs e)
         {
-
-        }
-
-        private async void OnClickEditRouteTriggerMenuItem(object sender, RoutedEventArgs e)
-        {
-            IWinUIRouteTrigger trigger = ((FrameworkElement)sender).DataContext as IWinUIRouteTrigger;
-            WinUIRoute route = trigger?.Route as WinUIRoute;
-            if (route == null || trigger == null)
+            WinUIRoute route = ((FrameworkElement)sender).Tag as WinUIRoute;
+            if (route == null)
                 return;
 
-            NewRouteTriggerDialog dialog = new()
+            NewRouteActionDialog dialog = new()
             {
-                Title = "Edit route trigger",
-                Destination = trigger,
+                Title = "Add route action",
                 XamlRoot = Content.XamlRoot
             };
 
@@ -216,38 +217,161 @@ namespace Redirector.WinUI.UI
             switch (result)
             {
                 case ContentDialogResult.Primary:
-                    if (trigger.GetType() == dialog.Source.GetType())
-                    {
-                        trigger.Copy(dialog.Source);
-                    }
-                    else
-                    {
-                        int index = route.Triggers.IndexOf(trigger);
-                        if (index != -1)
-                        {
-                            route.Triggers.RemoveAt(index);
-                            route.Triggers.Insert(index, dialog.Source);
-                        }
-                        else
-                        {
-                            route.Triggers.Add(dialog.Source);
-                        }
-                    }
+                    route.Actions.Add((IWinUIRouteOutputAction)dialog.Source);
                     break;
             }
         }
 
-        private async void OnClickDeleteRouteTriggerMenuItem(object sender, RoutedEventArgs e)
+        private void OnRouteInnerFlyoutOpening(object _sender, object e)
         {
-            IWinUIRouteTrigger trigger = ((FrameworkElement)sender).DataContext as IWinUIRouteTrigger;
-            WinUIRoute route = trigger?.Route as WinUIRoute;
-            if (route == null || trigger == null)
+            CommandBarFlyout sender = (CommandBarFlyout)_sender;
+            var dataContext = sender.Target?.DataContext ?? (sender.Target as ContentControl)?.Content;
+
+            IEnumerable<ICommandBarElement> commands = sender.PrimaryCommands.Concat(sender.SecondaryCommands);
+
+            foreach (ICommandBarElement command in commands)
+            {
+                if (command is not FrameworkElement obj)
+                    continue;
+                obj.DataContext = dataContext;
+            }
+        }
+
+        private async void OnClickEditRouteComponentButton(object sender, RoutedEventArgs e)
+        {
+            object dataContext = ((FrameworkElement)sender).DataContext;
+            if (dataContext == null)
                 return;
+
+            IRoute route = null;
+            IWinUIRouteTrigger trigger = dataContext as IWinUIRouteTrigger;
+            IWinUIRouteOutputAction action = dataContext as IWinUIRouteOutputAction;
+
+            if (trigger != null)
+                route = trigger.Route;
+            else if (action != null)
+                route = action.Route;
+            else
+                return;
+
+            if (route == null)
+                return;
+
+            ObjectContentDialog dialog = null;
+            if (trigger != null)
+            {
+                dialog = new NewRouteTriggerDialog()
+                {
+                    Title = "Edit route trigger",
+                    Destination = dataContext,
+                    XamlRoot = Content.XamlRoot
+                };
+            }
+            else
+            {
+                dialog = new NewRouteActionDialog()
+                {
+                    Title = "Edit route action",
+                    Destination = dataContext,
+                    XamlRoot = Content.XamlRoot
+                };
+            }
+
+            var result = await dialog.ShowAsync();
+            switch (result)
+            {
+                case ContentDialogResult.Primary:
+                    if (dataContext.GetType() == dialog.Source.GetType())
+                    {
+                        if (trigger != null)
+                        {
+                            trigger.Copy((IWinUIRouteTrigger)dialog.Source);
+                        }
+                        else
+                        {
+                            action.Copy((IWinUIRouteOutputAction)dialog.Source);
+                        }
+                    }
+                    else
+                    {
+                        int index;
+
+                        if (trigger != null)
+                        {
+                            index = route.Triggers.IndexOf(trigger);
+                        }
+                        else
+                        {
+                            index = route.Actions.IndexOf(action);
+                        }
+
+                        if (index != -1)
+                        {
+                            if ( trigger != null )
+                            {
+                                route.Triggers.RemoveAt(index);
+                                route.Triggers.Insert(index, (IWinUIRouteTrigger)dialog.Source);
+                            }
+                            else
+                            {
+                                route.Actions.RemoveAt(index);
+                                route.Actions.Insert(index, (IWinUIRouteOutputAction)dialog.Source);
+                            }
+                        }
+                        else
+                        {
+                            if (trigger != null)
+                            {
+                                route.Triggers.Add((IWinUIRouteTrigger)dialog.Source);
+                            }
+                            else
+                            {
+                                route.Actions.Add((IWinUIRouteOutputAction)dialog.Source);
+                            }
+                        }
+                    }
+
+                    break;
+            }
+        }
+
+        private async void OnClickDeleteRouteComponentButton(object sender, RoutedEventArgs e)
+        {
+            object dataContext = ((FrameworkElement)sender).DataContext;
+            if (dataContext == null)
+                return;
+
+            IRoute route = null;
+            IWinUIRouteTrigger trigger = dataContext as IWinUIRouteTrigger;
+            IWinUIRouteOutputAction action = dataContext as IWinUIRouteOutputAction;
+
+            if (trigger != null)
+                route = trigger.Route;
+            else if (action != null)
+                route = action.Route;
+            else
+                return;
+
+            if (route == null)
+                return;
+
+            string title;
+            string content;
+            if ( trigger != null )
+            {
+                title = "Delete route trigger";
+                content = "Are you sure you want to delete this trigger? This action is irreversible!";
+            }
+            else
+            {
+                title = "Delete route action";
+                content = "Are you sure you want to delete this action? This action is irreversible!";
+            }
 
             ContentDialog dialog = new ContentDialog()
             {
-                Title = "Delete route trigger",
-                Content = "Are you sure you want to delete this trigger? This action is irreversible!",
+                Title = title,
+                Content = content,
                 IsPrimaryButtonEnabled = true,
                 PrimaryButtonText = "Delete",
                 CloseButtonText = "Cancel",
@@ -260,7 +384,14 @@ namespace Redirector.WinUI.UI
             switch (result)
             {
                 case ContentDialogResult.Primary:
-                    route.Triggers.Remove(trigger);
+                    if (trigger != null)
+                    {
+                        route.Triggers.Remove(trigger);
+                    }
+                    else
+                    {
+                        route.Actions.Remove(action);
+                    }
                     break;
             }
         }

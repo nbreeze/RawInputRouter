@@ -22,7 +22,7 @@ namespace Redirector.Core
 
         public virtual void OnInput(IDeviceSource source, DeviceInput input)
         {
-            source.OnInput(input);
+            source?.OnInput(input);
 
             DispatchInputToRoutes(source, input);
 
@@ -39,8 +39,11 @@ namespace Redirector.Core
 
         public virtual bool ShouldBlockOriginalInput(IDeviceSource source, DeviceInput input)
         {
-            if (source.ShouldBlockOriginalInput(input))
-                return true;
+            if (source != null)
+            {
+                if (source.ShouldBlockOriginalInput(input))
+                    return true;
+            }
 
             foreach (IRoute route in Routes)
             {

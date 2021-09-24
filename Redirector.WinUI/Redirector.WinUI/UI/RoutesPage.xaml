@@ -5,6 +5,7 @@
     xmlns:local="using:Redirector.WinUI.UI"
     xmlns:root="using:Redirector.WinUI"
     xmlns:toolkit="using:CommunityToolkit.WinUI.UI.Controls"
+    xmlns:act="using:Redirector.WinUI.Actions"
     xmlns:trig="using:Redirector.WinUI.Triggers"
     xmlns:sys="using:System"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -15,27 +16,10 @@
     <Page.Resources>
         <CollectionViewSource x:Name="RoutesCVS"/>
 
-        <MenuFlyout x:Name="RouteTriggerContextMenuFlyout" x:Key="RouteTriggerContextMenuFlyout">
-            <MenuFlyoutItem Text="Edit" 
-                            Click="OnClickEditRouteTriggerMenuItem">
-                <MenuFlyoutItem.Icon>
-                    <SymbolIcon Symbol="Edit"/>
-                </MenuFlyoutItem.Icon>
-            </MenuFlyoutItem>
-            <MenuFlyoutItem Text="Delete" 
-                            Click="OnClickDeleteRouteTriggerMenuItem">
-                <MenuFlyoutItem.Icon>
-                    <SymbolIcon Symbol="Delete"/>
-                </MenuFlyoutItem.Icon>
-            </MenuFlyoutItem>
-        </MenuFlyout>
-
         <local:RouteTriggerDataTemplateSelector x:Key="RouteTriggerDataTemplateSelector">
             <local:RouteTriggerDataTemplateSelector.KeyboardInputTemplate>
                 <DataTemplate x:DataType="trig:WinUIKeyboardInputRouteTrigger">
-                    <StackPanel Tag="{x:Bind}" 
-                                HorizontalAlignment="Stretch"
-                                ContextFlyout="{StaticResource RouteTriggerContextMenuFlyout}">
+                    <StackPanel HorizontalAlignment="Stretch">
                         <Grid ColumnSpacing="12">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
@@ -54,6 +38,27 @@
             </local:RouteTriggerDataTemplateSelector.KeyboardInputTemplate>
         </local:RouteTriggerDataTemplateSelector>
         <local:RouteActionDataTemplateSelector x:Key="RouteActionDataTemplateSelector">
+
+            <local:RouteActionDataTemplateSelector.AcceleratorTemplate>
+                <DataTemplate x:DataType="act:WinUIAcceleratorOutputAction">
+                    <StackPanel HorizontalAlignment="Stretch" >
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <SymbolIcon Symbol="Keyboard"
+                                        Grid.Column="0"/>
+
+                            <TextBlock Grid.Column="1" Text="{x:Bind sys:String.Format('Accelerator {0}', Accelerator), Mode=OneWay}"/>
+
+                        </Grid>
+
+                    </StackPanel>
+                </DataTemplate>
+            </local:RouteActionDataTemplateSelector.AcceleratorTemplate>
+            
         </local:RouteActionDataTemplateSelector>
     </Page.Resources>
     
@@ -116,6 +121,21 @@
                                                             </StackPanel>
                                                         </ListView.Header>
 
+                                                        <ListView.ItemContainerStyle>
+                                                            <Style TargetType="ListViewItem">
+                                                                <Setter Property="ContextFlyout">
+                                                                    <Setter.Value>
+                                                                        <CommandBarFlyout Opening="OnRouteInnerFlyoutOpening">
+                                                                            <CommandBarFlyout.PrimaryCommands>
+                                                                                <AppBarButton Icon="Edit" Label="Edit" ToolTipService.ToolTip="Edit" Click="OnClickEditRouteComponentButton"/>
+                                                                                <AppBarButton Icon="Delete" Label="Delete" ToolTipService.ToolTip="Delete" Click="OnClickDeleteRouteComponentButton"/>
+                                                                            </CommandBarFlyout.PrimaryCommands>
+                                                                        </CommandBarFlyout>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                            </Style>
+                                                        </ListView.ItemContainerStyle>
+                                                        
                                                     </ListView>
 
                                                     <AppBarButton Icon="Add" LabelPosition="Collapsed"
@@ -136,8 +156,25 @@
                                                           Grid.Row="0"
                                                                 Grid.Column="2">
                                                         <ListView.Header>
-                                                            <TextBlock Margin="12,0,0,0">Actions:</TextBlock>
+                                                            <StackPanel Margin="12,0,0,0" Orientation="Horizontal">
+                                                                <TextBlock>Actions:</TextBlock>
+                                                            </StackPanel>
                                                         </ListView.Header>
+
+                                                        <ListView.ItemContainerStyle>
+                                                            <Style TargetType="ListViewItem">
+                                                                <Setter Property="ContextFlyout">
+                                                                    <Setter.Value>
+                                                                        <CommandBarFlyout Opening="OnRouteInnerFlyoutOpening">
+                                                                            <CommandBarFlyout.PrimaryCommands>
+                                                                                <AppBarButton Icon="Edit" Label="Edit" ToolTipService.ToolTip="Edit" Click="OnClickEditRouteComponentButton"/>
+                                                                                <AppBarButton Icon="Delete" Label="Delete" ToolTipService.ToolTip="Delete" Click="OnClickDeleteRouteComponentButton"/>
+                                                                            </CommandBarFlyout.PrimaryCommands>
+                                                                        </CommandBarFlyout>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                            </Style>
+                                                        </ListView.ItemContainerStyle>
                                                     </ListView>
 
                                                     <AppBarButton Icon="Add" LabelPosition="Collapsed"

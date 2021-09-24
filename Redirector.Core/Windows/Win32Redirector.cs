@@ -166,10 +166,7 @@ namespace Redirector.Core.Windows
             if (input != null)
             {
                 IDeviceSource source = Devices.Where(_d => _d is IWin32DeviceSource d && d.Handle == input.DeviceHandle).FirstOrDefault();
-                if (source != null)
-                {
-                    OnInput(source, input);
-                }
+                OnInput(source, input);
             }
         }
 
@@ -202,7 +199,7 @@ namespace Redirector.Core.Windows
 
                 // Find device source that made the input. This should not be null.
                 IDeviceSource source = Devices.Where(_d => _d is IWin32DeviceSource d && d.Handle == matchedInput.DeviceHandle)
-                    .First();
+                    .FirstOrDefault();
 
                 return ShouldBlockOriginalInput(source, matchedInput);
             }

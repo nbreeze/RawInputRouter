@@ -35,6 +35,7 @@
     <None Remove="UI\ApplicationsPage.xaml" />
     <None Remove="UI\DeviceSettingsDialog.xaml" />
     <None Remove="UI\Home\HomePage.xaml" />
+    <None Remove="UI\NewRouteActionDialog.xaml" />
     <None Remove="UI\NewRouteDialog.xaml" />
     <None Remove="UI\NewRouteTriggerDialog.xaml" />
     <None Remove="UI\RoutesPage.xaml" />
@@ -80,6 +81,12 @@
   <ItemGroup>
     <Folder Include="Themes\" />
     <Folder Include="UI\Routes\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="UI\NewRouteActionDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
 
   <ItemGroup>

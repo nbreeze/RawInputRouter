@@ -67,7 +67,7 @@ namespace Redirector.Core
 
         public virtual bool ShouldTrigger(IDeviceSource source, DeviceInput input)
         {
-            if (!input.CameFrom(source))
+            if (!input.CameFrom(Source))
                 return false;
 
             foreach (IRouteTrigger trigger in Triggers)

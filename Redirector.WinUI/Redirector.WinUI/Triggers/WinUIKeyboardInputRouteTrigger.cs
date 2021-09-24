@@ -1,4 +1,5 @@
 ﻿using Redirector.Core.Windows.Triggers;
+using Redirector.WinUI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
