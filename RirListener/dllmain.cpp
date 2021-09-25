@@ -83,13 +83,30 @@ LRESULT WINAPI KeyboardHookProc(int nCode, WPARAM wParam, LPARAM lParam)
         pKeyboard->m_nVirtualKey = (int)wParam;
 
         // Try to get a response from the program. If result is non-zero, will block the input.
-        LRESULT result = SendMessage(hWindow, WM_HOOK_KEYBOARD_INTERCEPT, wParam, lParam);
-#if 0
-        SendDebugMessage(1, (DWORD)result);
-#endif
-        if (result)
+        LRESULT result;
+
+        if (SendMessageTimeout(hWindow, WM_HOOK_KEYBOARD_INTERCEPT, wParam, lParam, SMTO_ERRORONEXIT, 5000, (PDWORD_PTR)&result))
         {
-            return 1;
+            if (result)
+                return 1;
+        }
+        else
+        {
+            if (GetLastError() == ERROR_TIMEOUT)
+            {
+                // Timed out; program probably crashed, so lets not hold the entire system up.
+                if (IsWindow(hWindow))
+                {
+                    InterceptorData64* pData = &m_SharedData.m_Data64;
+
+                    if (pData->m_KeyboardHookHandle) {
+                        UnhookWindowsHookEx((HHOOK)UIntToPtr(pData->m_KeyboardHookHandle));
+                        pData->m_KeyboardHookHandle = NULL;
+                    }
+                }
+
+                return 0;
+            }
         }
     }
 

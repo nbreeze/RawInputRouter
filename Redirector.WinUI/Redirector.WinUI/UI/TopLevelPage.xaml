@@ -11,14 +11,20 @@
     NavigationCacheMode="Required">
 
     <NavigationView PaneDisplayMode="Left" x:Name="Navigation" SelectionChanged="OnNavigationSelectionChanged"
-                        MenuItemsSource="{x:Bind NavigationItems}" BackRequested="OnNavigationBackRequested"
-                        IsBackEnabled="{x:Bind ContentFrame.CanGoBack, Mode=OneWay}"
-                        AlwaysShowHeader="True"
-                        Header="{x:Bind root:App.Current.ViewModel.TopLevelHeader, Mode=OneWay}"
-                        HorizontalAlignment="Stretch">
+                    MenuItemsSource="{x:Bind NavigationItems}" BackRequested="OnNavigationBackRequested"
+                    IsBackButtonVisible="Collapsed"
+                    IsBackEnabled="False"
+                    AlwaysShowHeader="True"
+                    Header="{x:Bind root:App.Current.ViewModel.TopLevelHeader, Mode=OneWay}"
+                    HorizontalAlignment="Stretch"
+                    IsSettingsVisible="True">
         <NavigationView.MenuItemTemplate>
             <DataTemplate x:DataType="local:NavigationItem">
-                <NavigationViewItem Content="{x:Bind Caption}" Icon="{x:Bind Icon}"/>
+                <NavigationViewItem Content="{x:Bind Caption}">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="{x:Bind Glyph}"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
             </DataTemplate>
         </NavigationView.MenuItemTemplate>
         <NavigationView.HeaderTemplate>
@@ -26,6 +32,6 @@
                 <TextBlock Text="{x:Bind}" Style="{ThemeResource SubheaderTextBlockStyle}" Margin="12,36,0,0"></TextBlock>
             </DataTemplate>
         </NavigationView.HeaderTemplate>
-        <Frame x:Name="ContentFrame" IsNavigationStackEnabled="True" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="12,20"/>
+        <Frame x:Name="ContentFrame" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="12,20"/>
     </NavigationView>
 </Page>

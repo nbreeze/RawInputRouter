@@ -9,7 +9,8 @@
     mc:Ignorable="d"
     IsPrimaryButtonEnabled="True"
     PrimaryButtonText="OK"
-    CloseButtonText="Cancel">
+    CloseButtonText="Cancel"
+    DefaultButton="Primary">
 
     <ContentDialog.Resources>
         <local:RouteActionDialogContentTemplateSelector x:Key="RouteActionDialogContentTemplateSelector">

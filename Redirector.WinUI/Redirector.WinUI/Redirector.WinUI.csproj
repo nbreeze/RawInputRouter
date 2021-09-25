@@ -34,7 +34,8 @@
     <None Remove="UI\ApplicationSettingsDialog.xaml" />
     <None Remove="UI\ApplicationsPage.xaml" />
     <None Remove="UI\DeviceSettingsDialog.xaml" />
-    <None Remove="UI\Home\HomePage.xaml" />
+    <None Remove="UI\DevicesPage.xaml" />
+    <None Remove="UI\HomePage.xaml" />
     <None Remove="UI\NewRouteActionDialog.xaml" />
     <None Remove="UI\NewRouteDialog.xaml" />
     <None Remove="UI\NewRouteTriggerDialog.xaml" />
@@ -45,9 +46,9 @@
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="7.0.3" />
     <PackageReference Include="CommunityToolkit.WinUI.UI.Controls" Version="7.0.3" />
-    <PackageReference Include="Microsoft.ProjectReunion" Version="0.8.3" />
-    <PackageReference Include="Microsoft.ProjectReunion.Foundation" Version="0.8.3" />
-    <PackageReference Include="Microsoft.ProjectReunion.WinUI" Version="0.8.3" />
+    <PackageReference Include="Microsoft.ProjectReunion" Version="0.8.4" />
+    <PackageReference Include="Microsoft.ProjectReunion.Foundation" Version="0.8.4" />
+    <PackageReference Include="Microsoft.ProjectReunion.WinUI" Version="0.8.4" />
     <PackageReference Include="PInvoke.Kernel32" Version="0.7.104" />
     <Manifest Include="$(ApplicationManifest)" />
   </ItemGroup>
@@ -73,14 +74,20 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Page Update="UI\Home\HomePage.xaml">
+    <Folder Include="Serialization\Triggers\" />
+    <Folder Include="Themes\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="UI\HomePage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Themes\" />
-    <Folder Include="UI\Routes\" />
+    <Page Update="UI\DevicesPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
 
   <ItemGroup>

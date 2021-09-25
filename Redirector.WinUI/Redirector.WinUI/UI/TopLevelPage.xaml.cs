@@ -5,7 +5,6 @@ using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
-using Redirector.WinUI.UI.Home;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -21,11 +20,11 @@ using Windows.Foundation.Collections;
 
 namespace Redirector.WinUI.UI
 {
-    public class NavigationItem
+    internal class NavigationItem
     {
         public string Caption { get; set; } = "";
-        public IconElement Icon { get; set; } = null;
-        public Type PageType { get; set; } = null;
+        public Symbol Glyph { get; set; }
+        public Type PageType { get; set; }
     }
 
     /// <summary>
@@ -33,11 +32,11 @@ namespace Redirector.WinUI.UI
     /// </summary>
     public sealed partial class TopLevelPage : Page
     {
-        public ICollection<NavigationItem> NavigationItems { get; } = new Collection<NavigationItem>()
+        private NavigationItem[] NavigationItems { get; } =
         {
-            new() { Caption = "Devices", Icon = new SymbolIcon(Symbol.Keyboard), PageType = typeof(HomePage) },
-            new() { Caption = "Applications", Icon = new SymbolIcon(Symbol.Caption), PageType = typeof(ApplicationsPage) },
-            new() { Caption = "Routes", Icon = new SymbolIcon(Symbol.Remote), PageType = typeof(RoutesPage) },
+            new() { Caption = "Devices", Glyph = Symbol.Keyboard, PageType = typeof(DevicesPage) },
+            new() { Caption = "Applications", Glyph = Symbol.Caption, PageType = typeof(ApplicationsPage) },
+            new() { Caption = "Routes", Glyph = Symbol.Remote, PageType = typeof(RoutesPage) },
         };
 
         public TopLevelPage()

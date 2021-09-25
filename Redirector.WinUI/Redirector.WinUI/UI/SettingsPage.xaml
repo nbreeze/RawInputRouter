@@ -8,7 +8,8 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Grid>
-
-    </Grid>
+    <StackPanel>
+        <Button Click="OnClickExportSettings">Export settings</Button>
+        <Button Click="OnClickImportSettings">Import settings</Button>
+    </StackPanel>
 </Page>
