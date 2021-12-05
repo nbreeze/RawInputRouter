@@ -39,6 +39,9 @@ namespace Redirector.WinUI.Serialization
                             case "Path":
                                 source.Path = reader.GetString();
                                 break;
+                            case "BlockOriginalInput":
+                                source.BlockOriginalInput = reader.GetBoolean();
+                                break;
                         }
 
                         break;
@@ -54,6 +57,7 @@ namespace Redirector.WinUI.Serialization
 
             writer.WriteString("Name", value.Name);
             writer.WriteString("Path", value.Path);
+            writer.WriteBoolean("BlockOriginalInput", value.BlockOriginalInput);
 
             writer.WriteEndObject();
         }

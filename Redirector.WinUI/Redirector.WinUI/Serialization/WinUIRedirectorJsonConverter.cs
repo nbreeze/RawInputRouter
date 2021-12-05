@@ -13,7 +13,9 @@ namespace Redirector.WinUI.Serialization
         public override WinUIRedirectorSerializedData Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             JsonConverter<WinUIDeviceSource> deviceConverter = options.GetConverter(typeof(WinUIDeviceSource))
-                as JsonConverter<WinUIDeviceSource>;
+                as JsonConverter<WinUIDeviceSource> ?? new WinUIDeviceSourceJsonConverter();
+            JsonConverter<WinUIApplicationReceiver> appConverter = options.GetConverter(typeof(WinUIApplicationReceiver))
+                as JsonConverter<WinUIApplicationReceiver> ?? new WinUIApplicationReceiverJsonConverter();
 
             if (reader.TokenType != JsonTokenType.StartObject)
             {
@@ -59,6 +61,30 @@ namespace Redirector.WinUI.Serialization
                                 FinishDevices:
 
                                 break;
+
+                            case "Applications":
+                                if (reader.TokenType != JsonTokenType.StartArray)
+                                    throw new JsonException();
+
+                                while (reader.Read())
+                                {
+                                    switch (reader.TokenType)
+                                    {
+                                        case JsonTokenType.EndArray:
+                                            goto FinishApps;
+                                        case JsonTokenType.StartObject:
+                                            WinUIApplicationReceiver app = appConverter.Read(ref reader, typeof(WinUIApplicationReceiver), options);
+                                            if (app != null)
+                                            {
+                                                data.Applications.Add(app);
+                                            }
+                                            break;
+                                    }
+                                }
+
+                                FinishApps:
+
+                                break;
                         }
 
                         break;
@@ -71,10 +97,9 @@ namespace Redirector.WinUI.Serialization
         public override void Write(Utf8JsonWriter writer, WinUIRedirectorSerializedData value, JsonSerializerOptions options)
         {
             JsonConverter<WinUIDeviceSource> deviceConverter = options.GetConverter(typeof(WinUIDeviceSource))
-                as JsonConverter<WinUIDeviceSource>;
-
-            if (deviceConverter == null)
-                deviceConverter = new WinUIDeviceSourceJsonConverter();
+                as JsonConverter<WinUIDeviceSource> ?? new WinUIDeviceSourceJsonConverter();
+            JsonConverter<WinUIApplicationReceiver> appConverter = options.GetConverter(typeof(WinUIApplicationReceiver))
+                as JsonConverter<WinUIApplicationReceiver> ?? new WinUIApplicationReceiverJsonConverter();
 
             writer.WriteStartObject();
 
@@ -83,6 +108,15 @@ namespace Redirector.WinUI.Serialization
             foreach (WinUIDeviceSource source in value.Devices)
             {
                 deviceConverter.Write(writer, source, options);
+            }
+
+            writer.WriteEndArray();
+
+            writer.WriteStartArray("Applications");
+
+            foreach (WinUIApplicationReceiver app in value.Applications)
+            {
+                appConverter.Write(writer, app, options);
             }
 
             writer.WriteEndArray();

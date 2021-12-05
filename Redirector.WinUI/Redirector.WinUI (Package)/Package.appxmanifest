@@ -8,12 +8,12 @@
 
   <Identity
     Name="ce80edab-3a73-4699-9092-40bc0b218869"
-    Publisher="CN=nikol"
+    Publisher="CN=Nikolai Bandong"
     Version="1.0.0.0" />
 
   <Properties>
-    <DisplayName>Redirector.WinUI (Package)</DisplayName>
-    <PublisherDisplayName>nikol</PublisherDisplayName>
+    <DisplayName>Redirector (Package)</DisplayName>
+    <PublisherDisplayName>Nikolai Bandong</PublisherDisplayName>
     <Logo>Images\StoreLogo.png</Logo>
   </Properties>
 

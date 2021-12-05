@@ -44,11 +44,11 @@
     <None Remove="UI\TopLevelPage.xaml" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="7.0.3" />
-    <PackageReference Include="CommunityToolkit.WinUI.UI.Controls" Version="7.0.3" />
-    <PackageReference Include="Microsoft.ProjectReunion" Version="0.8.4" />
-    <PackageReference Include="Microsoft.ProjectReunion.Foundation" Version="0.8.4" />
-    <PackageReference Include="Microsoft.ProjectReunion.WinUI" Version="0.8.4" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="7.1.2" />
+    <PackageReference Include="CommunityToolkit.WinUI.UI.Controls" Version="7.1.2" />
+    <PackageReference Include="Microsoft.ProjectReunion" Version="0.8.5" />
+    <PackageReference Include="Microsoft.ProjectReunion.Foundation" Version="0.8.5" />
+    <PackageReference Include="Microsoft.ProjectReunion.WinUI" Version="0.8.5" />
     <PackageReference Include="PInvoke.Kernel32" Version="0.7.104" />
     <Manifest Include="$(ApplicationManifest)" />
   </ItemGroup>

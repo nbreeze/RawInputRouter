@@ -60,19 +60,30 @@ namespace Redirector.WinUI.UI
             {
                 using Stream stream = await file.OpenStreamForReadAsync();
 
-                JsonSerializerOptions options = new();
-                options.Converters.Add(new WinUIRedirectorSerializedDataJsonConverter());
-                options.Converters.Add(new WinUIDeviceSourceJsonConverter());
+                JsonSerializerOptions options = new()
+                {
+                    Converters =
+                    {
+                        new WinUIRedirectorSerializedDataJsonConverter()
+                    }
+                };
 
                 WinUIRedirectorSerializedData data = await JsonSerializer.DeserializeAsync<WinUIRedirectorSerializedData>(stream, options);
 
                 var redirector = App.Current.Redirector;
                 redirector.Devices.Clear();
+                redirector.Applications.Clear();
                 
                 foreach (WinUIDeviceSource source in data.Devices)
                 {
                     redirector.Devices.Add(source);
                     source.Handle = source.FindHandle();
+                }
+
+                foreach (WinUIApplicationReceiver app in data.Applications)
+                {
+                    redirector.Applications.Add(app);
+                    app.FindWindow();
                 }
             }
         }
@@ -96,10 +107,12 @@ namespace Redirector.WinUI.UI
                 WinUIRedirectorSerializedData data = new(redirector.Devices, redirector.Applications, redirector.Routes);
                 JsonSerializerOptions options = new()
                 {
-                    WriteIndented = true
+                    WriteIndented = true,
+                    Converters =
+                    {
+                        new WinUIRedirectorSerializedDataJsonConverter()
+                    }
                 };
-                options.Converters.Add(new WinUIRedirectorSerializedDataJsonConverter());
-                options.Converters.Add(new WinUIDeviceSourceJsonConverter());
 
                 string json = JsonSerializer.Serialize(data, options);
 

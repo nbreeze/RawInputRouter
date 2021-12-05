@@ -12,6 +12,7 @@ namespace Redirector.WinUI
     {
         public WinUIDeviceSource() : base()
         {
+            BlockOriginalInput = true;
         }
 
         public WinUIDeviceSource(WinUIDeviceSource source) : this()

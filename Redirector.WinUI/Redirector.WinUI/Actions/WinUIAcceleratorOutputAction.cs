@@ -9,8 +9,9 @@ namespace Redirector.WinUI.Actions
 {
     public class WinUIAcceleratorOutputAction : AcceleratorOutputAction, IWinUIRouteOutputAction
     {
-        public void Copy(IWinUIRouteOutputAction action)
+        public virtual void Copy(IWinUIRouteOutputAction action)
         {
+            Accelerator = (action as WinUIAcceleratorOutputAction).Accelerator;
         }
     }
 }
