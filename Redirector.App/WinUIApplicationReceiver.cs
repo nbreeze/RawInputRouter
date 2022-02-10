@@ -1,11 +1,13 @@
 ﻿using Microsoft.UI.Xaml;
 using PInvoke;
+using Redirector.App.Serialization;
 using Redirector.Core;
 using Redirector.Core.Windows;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Redirector.App
@@ -17,6 +19,7 @@ namespace Redirector.App
         Contains
     }
 
+    [JsonConverter(typeof(WinUIApplicationReceiverJsonConverter))]
     public class WinUIApplicationReceiver : Win32ApplicationReceiver
     {
         private string _WindowTextSearchQuery = "";

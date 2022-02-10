@@ -3,10 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Redirector.App.Serialization
 {
+    [JsonConverter(typeof(WinUIRedirectorSerializedDataJsonConverter))]
     public class WinUIRedirectorSerializedData
     {
         public virtual List<WinUIDeviceSource> Devices { get; } = new();

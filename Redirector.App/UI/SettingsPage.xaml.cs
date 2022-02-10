@@ -59,20 +59,21 @@ namespace Redirector.App.UI
             if (file != null)
             {
                 using Stream stream = await file.OpenStreamForReadAsync();
+                RootedJsonReferenceHandler refHandler = new RootedJsonReferenceHandler();
 
                 JsonSerializerOptions options = new()
                 {
-                    Converters =
-                    {
-                        new WinUIRedirectorSerializedDataJsonConverter()
-                    }
+                    ReferenceHandler = refHandler
                 };
 
                 WinUIRedirectorSerializedData data = await JsonSerializer.DeserializeAsync<WinUIRedirectorSerializedData>(stream, options);
 
+                refHandler.Reset();
+
                 var redirector = App.Current.Redirector;
                 redirector.Devices.Clear();
                 redirector.Applications.Clear();
+                redirector.Routes.Clear();
                 
                 foreach (WinUIDeviceSource source in data.Devices)
                 {
@@ -84,6 +85,11 @@ namespace Redirector.App.UI
                 {
                     redirector.Applications.Add(app);
                     app.FindWindow();
+                }
+
+                foreach (WinUIRoute route in data.Routes)
+                {
+                    redirector.Routes.Add(route);
                 }
             }
         }
@@ -105,16 +111,17 @@ namespace Redirector.App.UI
             {
                 var redirector = App.Current.Redirector;
                 WinUIRedirectorSerializedData data = new(redirector.Devices, redirector.Applications, redirector.Routes);
+                RootedJsonReferenceHandler refHandler = new RootedJsonReferenceHandler();
+
                 JsonSerializerOptions options = new()
                 {
                     WriteIndented = true,
-                    Converters =
-                    {
-                        new WinUIRedirectorSerializedDataJsonConverter()
-                    }
+                    ReferenceHandler = refHandler
                 };
 
                 string json = JsonSerializer.Serialize(data, options);
+
+                refHandler.Reset();
 
                 await File.WriteAllTextAsync(file.Path, json);
             }

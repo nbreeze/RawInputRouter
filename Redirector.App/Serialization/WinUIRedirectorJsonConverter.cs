@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
@@ -12,10 +11,9 @@ namespace Redirector.App.Serialization
     {
         public override WinUIRedirectorSerializedData Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            JsonConverter<WinUIDeviceSource> deviceConverter = options.GetConverter(typeof(WinUIDeviceSource))
-                as JsonConverter<WinUIDeviceSource> ?? new WinUIDeviceSourceJsonConverter();
-            JsonConverter<WinUIApplicationReceiver> appConverter = options.GetConverter(typeof(WinUIApplicationReceiver))
-                as JsonConverter<WinUIApplicationReceiver> ?? new WinUIApplicationReceiverJsonConverter();
+            JsonConverter<WinUIDeviceSource> deviceConverter = options.GetConverter(typeof(WinUIDeviceSource)) as JsonConverter<WinUIDeviceSource>;
+            JsonConverter<WinUIApplicationReceiver> appConverter = options.GetConverter(typeof(WinUIApplicationReceiver)) as JsonConverter<WinUIApplicationReceiver>;
+            JsonConverter<WinUIRoute> routeConverter = options.GetConverter(typeof(WinUIRoute)) as JsonConverter<WinUIRoute>;
 
             if (reader.TokenType != JsonTokenType.StartObject)
             {
@@ -85,6 +83,30 @@ namespace Redirector.App.Serialization
                                 FinishApps:
 
                                 break;
+
+                            case "Routes":
+                                if (reader.TokenType != JsonTokenType.StartArray)
+                                    throw new JsonException();
+                                
+                                while (reader.Read())
+                                {
+                                    switch (reader.TokenType)
+                                    {
+                                        case JsonTokenType.EndArray:
+                                            goto FinishRoutes;
+                                        case JsonTokenType.StartObject:
+                                            WinUIRoute route = routeConverter.Read(ref reader, typeof(WinUIRoute), options);
+                                            if (route != null)
+                                            {
+                                                data.Routes.Add(route);
+                                            }
+                                            break;
+                                    }
+                                }
+
+                                FinishRoutes:
+
+                                break;
                         }
 
                         break;
@@ -96,10 +118,9 @@ namespace Redirector.App.Serialization
 
         public override void Write(Utf8JsonWriter writer, WinUIRedirectorSerializedData value, JsonSerializerOptions options)
         {
-            JsonConverter<WinUIDeviceSource> deviceConverter = options.GetConverter(typeof(WinUIDeviceSource))
-                as JsonConverter<WinUIDeviceSource> ?? new WinUIDeviceSourceJsonConverter();
-            JsonConverter<WinUIApplicationReceiver> appConverter = options.GetConverter(typeof(WinUIApplicationReceiver))
-                as JsonConverter<WinUIApplicationReceiver> ?? new WinUIApplicationReceiverJsonConverter();
+            JsonConverter<WinUIDeviceSource> deviceConverter = options.GetConverter(typeof(WinUIDeviceSource)) as JsonConverter<WinUIDeviceSource>;
+            JsonConverter<WinUIApplicationReceiver> appConverter = options.GetConverter(typeof(WinUIApplicationReceiver)) as JsonConverter<WinUIApplicationReceiver>;
+            JsonConverter<WinUIRoute> routeConverter = options.GetConverter(typeof(WinUIRoute)) as JsonConverter<WinUIRoute>;
 
             writer.WriteStartObject();
 
@@ -117,6 +138,15 @@ namespace Redirector.App.Serialization
             foreach (WinUIApplicationReceiver app in value.Applications)
             {
                 appConverter.Write(writer, app, options);
+            }
+
+            writer.WriteEndArray();
+
+            writer.WriteStartArray("Routes");
+
+            foreach (WinUIRoute route in value.Routes)
+            {
+                routeConverter.Write(writer, route, options);
             }
 
             writer.WriteEndArray();

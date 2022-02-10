@@ -8,6 +8,7 @@ using System.Text.Json.Serialization;
 
 namespace Redirector.App.Serialization
 {
+    [JsonConverter(typeof(WinUIApplicationReceiver))]
     public class WinUIApplicationReceiverJsonConverter : JsonConverter<WinUIApplicationReceiver>
     {
         public override WinUIApplicationReceiver Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -19,6 +20,8 @@ namespace Redirector.App.Serialization
 
             WinUIApplicationReceiver source = new();
             string propertyName;
+
+            ReferenceResolver resolver = options.ReferenceHandler?.CreateResolver();
 
             while (reader.Read())
             {
@@ -33,6 +36,14 @@ namespace Redirector.App.Serialization
 
                         switch (propertyName)
                         {
+                            case "$id":
+                                string reference = reader.GetString();
+                                if (resolver != null)
+                                {
+                                    resolver.AddReference(reference, source);
+                                }
+                                break;
+
                             case "Name":
                                 source.Name = reader.GetString();
                                 break;
@@ -59,7 +70,15 @@ namespace Redirector.App.Serialization
 
         public override void Write(Utf8JsonWriter writer, WinUIApplicationReceiver value, JsonSerializerOptions options)
         {
+            ReferenceResolver resolver = options.ReferenceHandler?.CreateResolver();
+
             writer.WriteStartObject();
+
+            if (resolver != null)
+            {
+                bool alreadyExists;
+                writer.WriteString("$id", resolver.GetReference(value, out alreadyExists));
+            }
 
             writer.WriteString("Name", value.Name);
             writer.WriteString("ExecutableName", value.ExecutableName);

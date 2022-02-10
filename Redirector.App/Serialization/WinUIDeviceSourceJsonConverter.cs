@@ -20,6 +20,8 @@ namespace Redirector.App.Serialization
             WinUIDeviceSource source = new();
             string propertyName;
 
+            ReferenceResolver resolver = options.ReferenceHandler?.CreateResolver();
+
             while (reader.Read())
             {
                 switch (reader.TokenType)
@@ -33,12 +35,22 @@ namespace Redirector.App.Serialization
 
                         switch (propertyName)
                         {
+                            case "$id":
+                                string reference = reader.GetString();
+                                if (resolver != null)
+                                {
+                                    resolver.AddReference(reference, source);
+                                }
+                                break;
+
                             case "Name":
                                 source.Name = reader.GetString();
                                 break;
+
                             case "Path":
                                 source.Path = reader.GetString();
                                 break;
+
                             case "BlockOriginalInput":
                                 source.BlockOriginalInput = reader.GetBoolean();
                                 break;
@@ -53,7 +65,15 @@ namespace Redirector.App.Serialization
 
         public override void Write(Utf8JsonWriter writer, WinUIDeviceSource value, JsonSerializerOptions options)
         {
+            ReferenceResolver resolver = options.ReferenceHandler?.CreateResolver();
+
             writer.WriteStartObject();
+
+            if (resolver != null)
+            {
+                bool alreadyExists;
+                writer.WriteString("$id", resolver.GetReference(value, out alreadyExists));
+            }
 
             writer.WriteString("Name", value.Name);
             writer.WriteString("Path", value.Path);
