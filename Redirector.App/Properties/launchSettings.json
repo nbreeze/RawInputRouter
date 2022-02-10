@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Redirector.App (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "Redirector.App (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

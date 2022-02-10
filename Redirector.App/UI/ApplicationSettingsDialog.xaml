@@ -1,0 +1,52 @@
+﻿<ContentDialog
+    x:Class="Redirector.App.UI.ApplicationSettingsDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:root="using:Redirector.App"
+    xmlns:local="using:Redirector.App.UI"
+    xmlns:sys="using:System"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d" 
+    IsPrimaryButtonEnabled="True" PrimaryButtonText="OK"
+    CloseButtonText="Cancel"
+    DefaultButton="Primary">
+
+    <ContentDialog.Resources>
+        <local:WindowTextSearchNameConverter x:Key="WindowTextSearchNameConverter"/>
+    </ContentDialog.Resources>
+
+    <ScrollViewer>
+        <StackPanel HorizontalAlignment="Left" Width="480">
+            <TextBox Header="Name:" Text="{x:Bind Source.Name, Mode=TwoWay, UpdateSourceTrigger=LostFocus}">
+                <TextBox.Description>
+                    <TextBlock TextWrapping="WrapWholeWords">
+                        A user-friendly name that helps identifies this application.
+                    </TextBlock>
+                </TextBox.Description>
+            </TextBox>
+            <TextBox Header="Executable Name:" Text="{x:Bind Source.ExecutableName, Mode=TwoWay, UpdateSourceTrigger=LostFocus}">
+                <TextBox.Description>
+                    <TextBlock TextWrapping="WrapWholeWords">
+                        The name of the executable file to search the windows of.
+                    </TextBlock>
+                </TextBox.Description>
+            </TextBox>
+            <ComboBox Header="Search window title:" ItemsSource="{x:Bind EnumType}" SelectedItem="{x:Bind Source.WindowTextSearch, Mode=TwoWay}">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="root:WindowTextSearch">
+                        <TextBlock Text="{x:Bind Converter={StaticResource WindowTextSearchNameConverter}}"/>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <TextBox Header="Search window title query:" Text="{x:Bind Source.WindowTextSearchQuery, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+            <CheckBox IsChecked="{x:Bind Source.WindowTextSearchCaseSensitive, Mode=TwoWay}">Case sensitive</CheckBox>
+            <CheckBox IsChecked="{x:Bind Source.LockOnFoundWindow, Mode=TwoWay}">Lock on window</CheckBox>
+
+            <Border BorderBrush="{ThemeResource DefaultTextForegroundThemeBrush}" BorderThickness="1,0,0,0"/>
+
+            <TextBox Header="Window Title:" Text="{x:Bind Source.WindowText, Mode=OneWay}" IsEnabled="False"/>
+
+        </StackPanel>
+    </ScrollViewer>
+</ContentDialog>

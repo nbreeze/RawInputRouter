@@ -1,0 +1,74 @@
+﻿<Page
+    x:Class="Redirector.App.UI.DevicesPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:root="using:Redirector.App"
+    xmlns:local="using:Redirector.App.UI"
+    xmlns:sys="using:System"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <ScrollViewer HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <StackPanel>
+                <Button Click="OnClickAddDeviceButton" Style="{StaticResource AddButtonStyle}" HorizontalAlignment="Stretch">
+                    Add device source
+                </Button>
+
+                <ListView ItemsSource="{x:Bind Sources, Mode=OneWay}">
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="ContextFlyout">
+                                <Setter.Value>
+                                    <MenuFlyout Opening="OnDeviceContextFlyoutOpening">
+                                        <MenuFlyout.Items>
+                                            <MenuFlyoutItem Click="OnClickRefreshDeviceMenuButton">
+                                                <MenuFlyoutItem.Icon>
+                                                    <SymbolIcon Symbol="Refresh"/>
+                                                </MenuFlyoutItem.Icon>
+                                                Refresh
+                                            </MenuFlyoutItem>
+                                            <MenuFlyoutItem Click="OnClickEditDeviceMenuButton">
+                                                <MenuFlyoutItem.Icon>
+                                                    <SymbolIcon Symbol="Edit"/>
+                                                </MenuFlyoutItem.Icon>
+                                                Edit
+                                            </MenuFlyoutItem>
+                                            <MenuFlyoutItem Click="OnClickDeleteDeviceMenuButton">
+                                                <MenuFlyoutItem.Icon>
+                                                    <SymbolIcon Symbol="Delete"/>
+                                                </MenuFlyoutItem.Icon>
+                                                Delete
+                                            </MenuFlyoutItem>
+                                        </MenuFlyout.Items>
+                                    </MenuFlyout>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="root:WinUIDeviceSource">
+                            <ListViewItem>
+                                <Grid ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="40"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="1">
+                                        <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind Name, Mode=OneWay}"/>
+                                        <TextBlock Text="{x:Bind Path, Mode=OneWay}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Text="{x:Bind sys:String.Format('0x{0:X}', Handle), Mode=OneWay}"/>
+                                    </StackPanel>
+                                    <SymbolIcon Grid.Column="0" Width="40" Height="40" Symbol="Keyboard"/>
+                                </Grid>
+                            </ListViewItem>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Page>

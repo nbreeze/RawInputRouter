@@ -1,0 +1,55 @@
+﻿<local:ObjectContentDialog
+    x:Class="Redirector.App.UI.NewRouteTriggerDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Redirector.App.UI"
+    xmlns:trig="using:Redirector.App.Triggers"
+    xmlns:winutl ="using:Redirector.Core.Windows.Util"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    IsPrimaryButtonEnabled="True"
+    PrimaryButtonText="OK"
+    CloseButtonText="Cancel"
+    DefaultButton="Primary">
+
+    <ContentDialog.Resources>
+        <local:RouteTriggerDialogContentTemplateSelector x:Key="RouteTriggerDialogContentTemplateSelector">
+            <local:RouteTriggerDialogContentTemplateSelector.KeyboardInputTemplate>
+                <DataTemplate x:DataType="trig:WinUIKeyboardInputRouteTrigger">
+                    <StackPanel>
+                        <TextBox Header="Key:" 
+                            IsReadOnly="True" 
+                            Text="{x:Bind GetKeyName(VKey), Mode=OneWay}"
+                            HorizontalAlignment="Stretch"/>
+
+                        <Button Click="OnClickKeyboardTriggerCapture" 
+                                HorizontalAlignment="Center"
+                                Margin="0,12,0,0"
+                                Content="{x:Bind local:NewRouteTriggerDialog.GetKeyboardTriggerCaptureButtonText(local:NewRouteTriggerDialog.Current.IsCapturingKeyboardInput), Mode=OneWay}"/>
+                    </StackPanel>
+                </DataTemplate>
+            </local:RouteTriggerDialogContentTemplateSelector.KeyboardInputTemplate>
+        </local:RouteTriggerDialogContentTemplateSelector>
+    </ContentDialog.Resources>
+    
+    <StackPanel Width="480">
+
+        <ComboBox x:Name="ComboBox"
+                  ItemsSource="{x:Bind Options}"
+                  SelectionChanged="OnSelectedItemChanged"
+                  HorizontalAlignment="Stretch">
+            <ComboBox.ItemTemplate>
+                <DataTemplate x:DataType="local:RouteTriggerTypeOption">
+                    <TextBlock Text="{x:Bind Name}"/>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+
+        <ContentControl Content="{x:Bind Source, Mode=OneWay}"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Stretch"
+                        ContentTemplateSelector="{StaticResource RouteTriggerDialogContentTemplateSelector}"/>
+
+    </StackPanel>
+</local:ObjectContentDialog>

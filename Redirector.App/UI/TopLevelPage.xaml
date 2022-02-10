@@ -1,0 +1,37 @@
+﻿<Page
+    x:Class="Redirector.App.UI.TopLevelPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Redirector.App.UI"
+    xmlns:root="using:Redirector.App"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+    NavigationCacheMode="Required">
+
+    <NavigationView PaneDisplayMode="Left" x:Name="Navigation" SelectionChanged="OnNavigationSelectionChanged"
+                    MenuItemsSource="{x:Bind NavigationItems}" BackRequested="OnNavigationBackRequested"
+                    IsBackButtonVisible="Collapsed"
+                    IsBackEnabled="False"
+                    AlwaysShowHeader="True"
+                    Header="{x:Bind root:App.Current.ViewModel.TopLevelHeader, Mode=OneWay}"
+                    HorizontalAlignment="Stretch"
+                    IsSettingsVisible="True">
+        <NavigationView.MenuItemTemplate>
+            <DataTemplate x:DataType="local:NavigationItem">
+                <NavigationViewItem Content="{x:Bind Caption}">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="{x:Bind Glyph}"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </DataTemplate>
+        </NavigationView.MenuItemTemplate>
+        <NavigationView.HeaderTemplate>
+            <DataTemplate x:DataType="x:String">
+                <TextBlock Text="{x:Bind}" Style="{ThemeResource SubheaderTextBlockStyle}" Margin="12,36,0,0"></TextBlock>
+            </DataTemplate>
+        </NavigationView.HeaderTemplate>
+        <Frame x:Name="ContentFrame" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="12,20"/>
+    </NavigationView>
+</Page>
