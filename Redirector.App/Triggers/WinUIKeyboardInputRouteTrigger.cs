@@ -5,9 +5,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Text.Json.Serialization;
+using Redirector.App.Serialization.Triggers;
 
 namespace Redirector.App.Triggers
 {
+    [JsonConverter(typeof(WinUIKeyboardInputRouteTriggerJsonConverter))]
     public class WinUIKeyboardInputRouteTrigger : KeyboardInputRouteTrigger, IWinUIRouteTrigger
     {
         public void Copy(IWinUIRouteTrigger _trigger)

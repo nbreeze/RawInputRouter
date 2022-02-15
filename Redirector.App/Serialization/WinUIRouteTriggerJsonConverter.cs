@@ -1,9 +1,6 @@
-﻿using Redirector.App.Actions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime;
-using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -11,16 +8,16 @@ using System.Threading.Tasks;
 
 namespace Redirector.App.Serialization
 {
-    public class WinUIRouteOutputActionJsonConverter : JsonConverter<IWinUIRouteOutputAction>
+    public class WinUIRouteTriggerJsonConverter : JsonConverter<IWinUIRouteTrigger>
     {
-        public override IWinUIRouteOutputAction Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override IWinUIRouteTrigger Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             if (reader.TokenType != JsonTokenType.StartObject)
             {
                 throw new JsonException();
             }
 
-            IWinUIRouteOutputAction value = null;
+            IWinUIRouteTrigger value = null;
             Type actionType = null;
             string propertyName;
 
@@ -48,13 +45,13 @@ namespace Redirector.App.Serialization
 
                             case "Data":
                                 if (actionType == null)
-                                    throw new JsonException("Tried to read Data property of unresolved Action type!");
+                                    throw new JsonException("Tried to read Data property of unresolved Trigger type!");
 
                                 JsonConverter converter = options.GetConverter(actionType);
                                 Type readHelperType = typeof(JsonConverterReadHelper<>).MakeGenericType(actionType);
                                 JsonConverterReadHelper readHelper = (JsonConverterReadHelper)Activator.CreateInstance(readHelperType, converter);
 
-                                value = (IWinUIRouteOutputAction)readHelper.Read(ref reader, actionType, options);
+                                value = (IWinUIRouteTrigger)readHelper.Read(ref reader, actionType, options);
 
                                 break;
                         }
@@ -66,7 +63,7 @@ namespace Redirector.App.Serialization
             throw new JsonException();
         }
 
-        public override void Write(Utf8JsonWriter writer, IWinUIRouteOutputAction value, JsonSerializerOptions options)
+        public override void Write(Utf8JsonWriter writer, IWinUIRouteTrigger value, JsonSerializerOptions options)
         {
             Type valueType = value.GetType();
             JsonConverter converter = options.GetConverter(valueType);

@@ -19,6 +19,7 @@ namespace Redirector.App.Serialization
             }
 
             WinUIRoute route = new WinUIRoute();
+            JsonConverter<IWinUIRouteTrigger> triggerConverter = new WinUIRouteTriggerJsonConverter();
             JsonConverter<IWinUIRouteOutputAction> actionConverter = new WinUIRouteOutputActionJsonConverter();
 
             ReferenceResolver resolver = options.ReferenceHandler?.CreateResolver();
@@ -61,6 +62,32 @@ namespace Redirector.App.Serialization
 
                                 break;
 
+                            case "Triggers":
+                                if (reader.TokenType != JsonTokenType.StartArray)
+                                {
+                                    throw new JsonException();
+                                }
+
+                                while (reader.Read())
+                                {
+                                    switch (reader.TokenType)
+                                    {
+                                        case JsonTokenType.EndArray:
+                                            goto TriggerArrayEnd;
+                                        case JsonTokenType.StartObject:
+                                            var trigger = triggerConverter.Read(ref reader, typeof(IWinUIRouteTrigger), options);
+                                            if (trigger != null)
+                                            {
+                                                route.Triggers.Add(trigger);
+                                            }
+                                            break;
+                                    }
+                                }
+
+                                TriggerArrayEnd:
+
+                                break;
+
                             case "Actions":
                                 if (reader.TokenType != JsonTokenType.StartArray)
                                 {
@@ -98,6 +125,7 @@ namespace Redirector.App.Serialization
         public override void Write(Utf8JsonWriter writer, WinUIRoute value, JsonSerializerOptions options)
         {
             ReferenceResolver resolver = options.ReferenceHandler?.CreateResolver();
+            JsonConverter<IWinUIRouteTrigger> triggerConverter = new WinUIRouteTriggerJsonConverter();
             JsonConverter<IWinUIRouteOutputAction> actionConverter = new WinUIRouteOutputActionJsonConverter();
 
             writer.WriteStartObject();
@@ -112,6 +140,15 @@ namespace Redirector.App.Serialization
                 reference = resolver.GetReference(value.Destination, out alreadyExists);
                 writer.WriteString("Destination", reference);
             }
+
+            writer.WriteStartArray("Triggers");
+
+            foreach (IWinUIRouteTrigger trigger in value.Triggers)
+            {
+                triggerConverter.Write(writer, trigger, options);
+            }
+
+            writer.WriteEndArray();
 
             writer.WriteStartArray("Actions");
 
