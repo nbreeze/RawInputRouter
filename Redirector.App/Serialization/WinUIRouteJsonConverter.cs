@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 
 namespace Redirector.App.Serialization
 {
-    [JsonConverter(typeof(WinUIRoute))]
     public class WinUIRouteJsonConverter : JsonConverter<WinUIRoute>
     {
         public override WinUIRoute Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -20,6 +19,7 @@ namespace Redirector.App.Serialization
             }
 
             WinUIRoute route = new WinUIRoute();
+            JsonConverter<IWinUIRouteOutputAction> actionConverter = new WinUIRouteOutputActionJsonConverter();
 
             ReferenceResolver resolver = options.ReferenceHandler?.CreateResolver();
             string reference;
@@ -60,18 +60,45 @@ namespace Redirector.App.Serialization
                                 }
 
                                 break;
+
+                            case "Actions":
+                                if (reader.TokenType != JsonTokenType.StartArray)
+                                {
+                                    throw new JsonException();
+                                }
+
+                                while (reader.Read())
+                                {
+                                    switch (reader.TokenType)
+                                    {
+                                        case JsonTokenType.EndArray:
+                                            goto ActionArrayEnd;
+                                        case JsonTokenType.StartObject:
+                                            var action = actionConverter.Read(ref reader, typeof(IWinUIRouteOutputAction), options);
+                                            if (action != null)
+                                            {
+                                                route.Actions.Add(action);
+                                            }
+                                            break;
+                                    }
+                                }
+
+                                ActionArrayEnd:
+
+                                break;
                         }
 
                         break;
                 }
             }
 
-            return route;
+            throw new JsonException();
         }
 
         public override void Write(Utf8JsonWriter writer, WinUIRoute value, JsonSerializerOptions options)
         {
             ReferenceResolver resolver = options.ReferenceHandler?.CreateResolver();
+            JsonConverter<IWinUIRouteOutputAction> actionConverter = new WinUIRouteOutputActionJsonConverter();
 
             writer.WriteStartObject();
 
@@ -85,6 +112,15 @@ namespace Redirector.App.Serialization
                 reference = resolver.GetReference(value.Destination, out alreadyExists);
                 writer.WriteString("Destination", reference);
             }
+
+            writer.WriteStartArray("Actions");
+
+            foreach (IWinUIRouteOutputAction action in value.Actions)
+            {
+                actionConverter.Write(writer, action, options);
+            }
+
+            writer.WriteEndArray();
 
             writer.WriteEndObject();
         }

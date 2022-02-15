@@ -64,9 +64,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Serialization\Triggers\" />
-  </ItemGroup>
-  <ItemGroup>
     <Page Update="UI\ApplicationSettingsDialog.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>

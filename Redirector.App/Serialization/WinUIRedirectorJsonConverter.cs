@@ -113,7 +113,7 @@ namespace Redirector.App.Serialization
                 }
             }
 
-            return data;
+            throw new JsonException();
         }
 
         public override void Write(Utf8JsonWriter writer, WinUIRedirectorSerializedData value, JsonSerializerOptions options)
